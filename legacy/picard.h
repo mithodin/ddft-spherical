@@ -1,22 +1,18 @@
-#include "pc-config.h"
-typedef struct _picc {
+typedef struct _p {
+	double *buffer[4];
 	double *alpha;
 	double *alpha_max;
-	double *direction[COMPONENTS];
-	double *x[COMPONENTS];
-	double *x_old[COMPONENTS];
-	double *gradient[COMPONENTS];
-	double *result;
-	bool *mask;
-	size_t dim;
-	size_t num_optimize_components;
+	double *direction[2];
 	size_t optimize_component;
+	size_t bins;
 	dim3 blocks;
 	size_t threads;
-	TYPE_OBJCONF conf;
+	DFTS_t dfts;
+	struct _p *_self;
 } Picard;
 
 typedef Picard * Picard_t;
-__host__ Picard_t picard_init(TYPE_OBJCONF conf, size_t num_bins, size_t components, size_t component, bool *mask);
-__host__ void picard_destroy(Picard_t p);
-__host__ void picard_minimize(Picard_t p, double **x0);
+
+__host__ Picard_t dfts_picard_init(DFTS_t conf, size_t components, size_t component);
+__host__ void dfts_picard_destroy(Picard_t p);
+__host__ void dfts_picard_minimize(Picard_t p);

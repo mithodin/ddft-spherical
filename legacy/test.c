@@ -1,127 +1,131 @@
-#include <nlopt.h>
-#include <stdio.h>
 #include <math.h>
-#include <progressbar.h>
-#include "pfts_public.h"
-#include "debug.h"
+#include <stdio.h>
+#include "config.h"
+#include "data.h"
+#include "memory.h"
+#include "dfts.h"
 
 #define N 4096
-#define DR (1.0/128)
+#define DR 1.0/128.0
 #define BINS_SPHERE 64
-#define INNER_TS 2000
-#define TIME 1000
-#define PEXC_ALPHA 1e-5
-#define ZETA 1.
-#define TAU_MEM 1.
 
-void print_mv(DFTS_t conf){
-	double mv[5];
-	mv[4] = dfts_get_mean_density(conf,mv,mv+2);
-	printf("    total self density: %.10e\n     mean self density: %.10e\n",mv[0],mv[2]);
-	printf("total distinct density: %.10e\n mean distinct density: %.10e\n",mv[1],mv[3]);
-	printf("mean density: %.10e\n",mv[4]);
-}
-
-void numerical_gradient(PFTS_t conf, double **current, double **grad){
-	double c0 = 0.0;
-	double h = 1e-7;
-	for(int b = 0;b<2;++b){
-		for(int i=0;i<N;++i){
-			c0 = current[b][i];
-			current[b][i] += h;
-			pfts_set_current(conf,(const double**)current);
-			double fp = pfts_rt_c(conf,NULL);
-			current[b][i] = c0-h;
-			pfts_set_current(conf,(const double**)current);
-			double fm = pfts_rt_c(conf,NULL);
-			current[b][i] = c0;
-			pfts_set_current(conf,(const double**)current);
-			grad[b][i] = (fp-fm)/(2*h);
-		}
+__host__ void gradient_numeric(DFTS_t conf, double **rho, double **grad){
+	double r0 = 0.0;
+	double h = 1e-6;
+	dfts_fexc(conf, rho, grad);
+	for(int i=0;i<N;++i){
+		r0 = rho[0][i];
+		rho[0][i] += h;
+		double fp = dfts_fexc(conf, rho, NULL);
+		double fm;
+		rho[0][i] = r0-h;
+		fm = dfts_fexc(conf, rho, NULL);
+		rho[0][i] = r0;
+		dfts_set_density(conf,(const double**)rho);
+		grad[1][i] = (fp-fm)/(2*h*(1+i)*(1+i)*DR*DR*DR);
+		
 	}
 }
+
+void test_mu_rho(DFTS_t conf){
+	double *rho[2] = {malloc(2*N*sizeof(double)),NULL};
+	rho[1] = rho[0]+N;
+	for(int i=0;i<N;++i){
+		rho[0][i] = 1;
+		rho[1][i] = 1e-200;
+	}
+	dfts_set_density(conf,(const double**)rho);
+	double bd[100];
+	double mu = 0.0;
+	for(int k = 0;k<100;++k){
+		mu = k*0.02;
+		dfts_set_chemical_potential(conf,mu);
+		dfts_minimize_component(conf,0);
+		bd[k] = dfts_get_mean_density(conf,NULL,NULL);
+	}
+	FILE *out = fopen("rho-mu.dat","w");
+	for(int k=0;k<100;++k){
+		fprintf(out,"%d\t%.2f\t%.10e\n",k,k*0.02,bd[k]);
+	}
+	fclose(out);
+	free(rho[0]);
+}
+
+#define ZERO 1e-60
 
 int main(void){
-	PFTS_t conf = pfts_create(N, DR, BINS_SPHERE, 1e-6);
-	pfts_pexc_settings(conf,PEXC_ALPHA,ZETA,TAU_MEM);
-	double *current[2] = {malloc(2*N*sizeof(double)),NULL};
-	current[1] = current[0]+N;
+	FILE *out = NULL;
+	DFTS_t conf = dfts_init(N,DR,BINS_SPHERE);
+	double *grad[2] = {malloc(2*N*sizeof(double)),NULL};
+	grad[1] = grad[0]+N;
+	double *rho[2] = {malloc(2*N*sizeof(double)),NULL};
+	rho[1] = rho[0]+N;
 	for(int i=0;i<N;++i){
-		current[0][i] = 0.0;
-		current[1][i] = 0.0;
+		rho[0][i] = ZERO;
+		rho[1][i] = ZERO;
 	}
-	pfts_set_current(conf, (const double**)current);
+	rho[0][0] = 1.0/(4.0*M_PI*(1.0/3.0-1.0/4.0)*DR*DR*DR)-1e-8;
 
-	double *grad[4] = {malloc(4*N*sizeof(double)),NULL,NULL,NULL};
-	for(int i=1;i<4;++i){
-		grad[i] = grad[0]+i*N;
-	}
+	dfts_set_density(conf,(const double**)rho);
 
-	double *density[2] = {malloc(2*N*sizeof(double)),NULL};
-	density[1] = density[0]+N;
-	/*double alpha = 0.1;
-	double a0 = pow(alpha/M_PI,3.0/2.0);
+	/*double *pot = malloc(N*sizeof(double));
 	for(int i=0;i<N;++i){
-		//density[0][i] = a0*exp(-alpha*i*i*DR*DR)/1.2;
-		density[0][i] = 0.1+exp(-(i*DR-10)*(i*DR-10))*0.01;
-		density[1][i] = 0.1+exp(-(i*DR-5)*(i*DR-5))*0.01;
+		double r = i*DR;
+		//pot[i] = -exp(-r*r/30)*cos(r*M_PI/2);
+		pot[i] = 0.0*r;
 	}
-	pfts_set_density(conf,(const double**)density);*/
+	dfts_set_potential(conf,pot);*/
 
-	//dfts_minimize_component(conf->dfts,1);
+	double mu = dfts_get_chemical_potential_mean_density(conf,.7266666666666666666666666,-1);
+	printf("mu = %.15e\n",mu);
+	//return 0;
+	dfts_set_chemical_potential(conf,mu);
 
-	//dfts_set_chemical_potential(conf->dfts,7.98251061110204);
-	dfts_set_chemical_potential(conf->dfts,1.0);
-	pfts_init_rdf(conf);
-
-	FILE *out = fopen("current.dat","w");fclose(out); //clear file
-
-	pfts_minimize(conf);
-	for(int t=0;t<TIME;++t){
-		print_mv(conf->dfts);
-		pfts_get_current(conf,current);
-		dfts_get_density(conf->dfts,density);
-		bool ex=false;
-		out = fopen("current.dat","a");
-		for(int i=0;i<N;++i){
-			if( isnan(density[0][i]) || isnan(density[1][i]) ){
-				ex=true;
-			}
-			fprintf(out,"%f\t%.30e\t%.30e\t%.30e\t%.30e\n",i*DR,density[0][i],density[1][i],current[0][i],current[1][i]);
+	bool *mask = malloc(N*sizeof(bool));
+	{
+		int i = 0;
+		for(;i<2*BINS_SPHERE;++i){
+			mask[i] = false;
 		}
-		fprintf(out,"\n\n");
-		fclose(out);
-		if(ex){
-			printf("NaN density, exiting.\n");
-			return 1;
+		for(;i<N;++i){
+			mask[i] = true;
 		}
-	
-		progressbar *pr = progressbar_new_with_format("",INNER_TS/20,"[=]");
-		for(int tt=0;tt<INNER_TS;++tt){
-			pfts_advance_time(conf);
-			pfts_minimize(conf);
-			if( tt%20 == 0 ){
-				progressbar_inc(pr);
-			}
-		}
-		progressbar_finish(pr);
-
-		printf("%04d/%04d\n",t+1,TIME);
-		//pfts_renormalize(conf);
 	}
-	pfts_get_current(conf,current);
-	pfts_advance_time(conf);
-	dfts_get_density(conf->dfts,density);
-	out = fopen("current.dat","a");
+
+	double f = dfts_omega(conf,NULL);
+	printf("omega[rho] = %.20e\n",f);
+
+	//dfts_log_wd(conf,"wd.dat");
+	//dfts_log_psi(conf,"psi.dat");
+
+	/*gradient_numeric(conf, rho, grad);
+
+	out = fopen("gradient-num.dat","w");
 	for(int i=0;i<N;++i){
-		fprintf(out,"%f\t%.30e\t%.30e\t%.30e\t%.30e\n",i*DR,density[0][i],density[1][i],current[0][i],current[1][i]);
+		fprintf(out,"%.10f\t%e\t%e\n",i*DR,grad[0][i],grad[1][i]);
 	}
-	fprintf(out,"\n\n");
+
+	return 0; */
+
+	dfts_minimize_component_mask(conf,1,mask);
+	//dfts_minimize_component(conf,0);
+	//dfts_minimize(conf);
+
+	dfts_get_density(conf,rho);
+
+	out = fopen("density.dat","w");
+	for(int i=0;i<N;++i){
+		fprintf(out,"%f\t%.20e\t%.20e\n",(i*DR),rho[0][i],rho[1][i]);
+	}
 	fclose(out);
-	print_mv(conf->dfts);
-	pfts_destroy(conf);
-	free(current[0]);
+
+	double md = dfts_get_mean_density(conf,NULL,NULL);
+	printf("Mean density: %.20e\n",md);
+
+	dfts_destroy(conf);
+
 	free(grad[0]);
-	free(density[0]);
+	free(rho[0]);
+	free(mask);
 	return 0;
 }

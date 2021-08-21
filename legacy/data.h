@@ -1,32 +1,50 @@
-#define PFTS_NUM_BUFFERS 5
-#define PFTS_SIZE_RESULTS 5
 
-//Datatypes
-typedef struct _pexc {
-	double prefactor;
-	double timestep;
-	double gauss_f; //irrelevant for local p_exc
-	int iterations;
-} PFTS_Pexc_conf;
+#ifndef size_t
+#include <stdlib.h>
+#endif
 
-typedef PFTS_Pexc_conf * PFTS_Pexc_t;
+#ifndef bool
+#include <stdbool.h>
+#endif
 
-typedef struct _pc {
-	DFTS_t dfts;
-	DFTS_t dfts_gpu;
+#ifndef dim3
+#include <vector_types.h>
+#endif
+
+typedef enum {
+	semi_linearized,
+	quenched,
+	full
+} DFTS_selfinteraction;
+
+typedef enum { dfts_n2 = 0, dfts_n3 = 1, dfts_n2v = 2, dfts_n11 = 3, dfts_num_wd = 4 } dfts_wd;
+
+typedef struct _kconf {
+	size_t blocks_1;
+	size_t threads;
+	dim3 blocks_2;
+	dim3 blocks_wd;
+} DFTS_kernelconfig;
+
+typedef struct _c {
+        size_t num_bins;
+	double dr;
+        double radius_sphere;
+        size_t bins_sphere;
+        double chemical_potential;
+	DFTS_kernelconfig kc;
 	double *results;
-	double *buffer[PFTS_NUM_BUFFERS];
-	double *gradient[2];
-	double *current[2];
-	double mean_density[2];
-	double dt;
-	unsigned long timestep;
-	unsigned long time_fdot;
-	double *fdot[2];
-	double *density_update[2];
-	double *current_sum;
-	double *memory;
-	PFTS_Pexc_t pexc_conf;
-} PFTS_conf;
+	double *density_sum[2];
+        double *potential;
+	double *grad_potential;
+	double *buffer[NUM_BUFFERS];
+	double *weighted_density[2][dfts_num_wd];
+	double *psi[2][dfts_num_wd];
+        double *density[2];
+        double *gradient[2];
+	bool *min_mask;
+	struct _c *_self;
+	DFTS_selfinteraction selfinteraction;
+} DFTS_conf;
 
-typedef PFTS_conf * PFTS_t;
+typedef DFTS_conf * DFTS_t;
