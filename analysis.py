@@ -23,6 +23,11 @@ class Analysis:
         res[-1] = (f[-3] - 4 * f[-2] + 3 * f[-1]) / 2.
         return res/self.dr
 
+    def delta(self):
+        res = np.zeros(self.n)
+        res[0] = 1.0/self.weights[0]
+        return res
+
 
 def test_weights():
     dr = 2**-3
@@ -56,3 +61,12 @@ def test_gradient():
 
     f = f**2/2.  # r**2/2
     assert ana.gradient(f) == approx(np.arange(n)*dr)
+
+
+def test_delta():
+    dr = 2**-7
+    n = 64
+    ana = Analysis(dr, n)
+    delta = ana.delta()
+    assert delta[1:] == approx(np.zeros(n-1))
+    assert ana.integrate(delta) == approx(1.0)
