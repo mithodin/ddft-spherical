@@ -28,6 +28,17 @@ class Analysis:
         res[0] = 1.0/self.weights[0]
         return res
 
+    def divergence(self, f):
+        weights = self.weights
+        dr = self.dr
+        n = self.n
+        fk2 = f*np.arange(n)**2
+        div = (np.roll(fk2, 1) - np.roll(fk2, -1))/weights
+        div[0] = -fk2[1]/weights[0]
+        div[-1] = (fk2[-2] - fk2[-1]/(n-1)**2*n**2)/weights[-1]
+        # there is a factor of /2 here that I do not entirely understand
+        return 2*np.pi*dr**2*div
+
 
 def test_weights():
     dr = 2**-3
@@ -70,3 +81,16 @@ def test_delta():
     delta = ana.delta()
     assert delta[1:] == approx(np.zeros(n-1))
     assert ana.integrate(delta) == approx(1.0)
+
+
+def test_continuity():
+    dr = 2**-7
+    n = 4096
+
+    r = np.arange(n)*dr
+    j = r/3.
+
+    ana = Analysis(dr, n)
+
+    # edges are special, disregard them
+    assert ana.divergence(j)[15:-5] == approx(-(np.zeros(n-20) + 1.0), rel=10**-3)

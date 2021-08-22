@@ -10,33 +10,7 @@ class Diffusion:
 
     def step(self, rho):
         j = -self._ana.gradient(rho)
-        return rho + self.continuity_step(j)
-
-    def continuity_step(self, j):
-        weights = self._ana.weights
-        dr = self._ana.dr
-        n = self._ana.n
-        jk2 = j*np.arange(n)**2
-        drho = (np.roll(jk2, 1) - np.roll(jk2, -1))/weights
-        drho[0] = -jk2[1]/weights[0]
-        drho[-1] = (jk2[-2] - jk2[-1]/(n-1)**2*n**2)/weights[-1]
-        # there is a factor of /2 here that I do not entirely understand
-        return 4*np.pi*dr**2*drho*self.dt/2
-
-
-def test_continuity():
-    dr = 2**-7
-    n = 4096
-    dt = 10**-7
-
-    r = np.arange(n)*dr
-    j = r/3.
-
-    ana = Analysis(dr, n)
-    diff = Diffusion(ana, dt)
-
-    # edges are special, disregard them
-    assert diff.continuity_step(j)[15:-5] == approx(-(np.zeros(n-20) + 1.0)*dt, rel=10**-3)
+        return rho + self._ana.divergence(j)*self.dt
 
 
 def test_diffusion():
