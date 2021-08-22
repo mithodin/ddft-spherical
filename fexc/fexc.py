@@ -10,7 +10,7 @@ class Fexc:
     def __init__(self, analysis: Analysis):
         self._ana = analysis
 
-    def fexc(self, rho: np.array) -> float:
+    def fexc(self, rho: (np.array, np.array)) -> float:
         return 0.0
 
     def d_fexc_d_rho(self, rho: (np.array, np.array)) -> (np.array, np.array):
