@@ -31,9 +31,11 @@ class WeightCalculator:
             (self.r, (self.k-1)*self.dr, (self.k+1)*self.dr)
         )
         return np.array(
-            [s.N(w0.replace(self.dr, dr))]
+            [0 for _ in range(0, i0)]
+            + [s.N(w0.replace(self.dr, dr))]
             + [s.N(w.replace(self.k, i).replace(self.dr, dr)) for i in range(i0+1, i1)]
             + [s.N(wm.replace(self.dr, dr))]
+            + [0 for _ in range(i1+1, n)]
         )
 
 
