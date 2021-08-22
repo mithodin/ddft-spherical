@@ -37,7 +37,7 @@ class Analysis:
         div[0] = -fk2[1]/weights[0]
         div[-1] = (fk2[-2] - fk2[-1]/(n-1)**2*n**2)/weights[-1]
         # there is a factor of /2 here that I do not entirely understand
-        return 2*np.pi*dr**2*div
+        return -2*np.pi*dr**2*div
 
 
 def test_weights():
@@ -83,7 +83,7 @@ def test_delta():
     assert ana.integrate(delta) == approx(1.0)
 
 
-def test_continuity():
+def test_divergence():
     dr = 2**-7
     n = 4096
 
@@ -93,4 +93,4 @@ def test_continuity():
     ana = Analysis(dr, n)
 
     # edges are special, disregard them
-    assert ana.divergence(j)[15:-5] == approx(-(np.zeros(n-20) + 1.0), rel=10**-3)
+    assert ana.divergence(j)[15:-5] == approx((np.zeros(n-20) + 1.0), rel=10**-3)
