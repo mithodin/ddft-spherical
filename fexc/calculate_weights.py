@@ -1,7 +1,6 @@
 import sympy as s
 import numpy as np
 from pytest import approx
-
 from analysis import Analysis
 
 
@@ -35,7 +34,8 @@ class WeightCalculator:
             + [s.N(w0.replace(self.dr, dr))]
             + [s.N(w.replace(self.k, i).replace(self.dr, dr)) for i in range(i0+1, i1)]
             + [s.N(wm.replace(self.dr, dr))]
-            + [0 for _ in range(i1+1, n)]
+            + [0 for _ in range(i1+1, n)],
+            dtype=np.double
         )
 
 
@@ -46,5 +46,19 @@ def test_volume_integral():
     factor = wc.r**2*4*s.pi
     ana = Analysis(dr, n)
 
-    weights = np.array([s.N(w.replace(wc.dr, dr)) for w in wc.get_weights(factor, n, 0, n-1, dr)], dtype=float)
+    weights = wc.get_weights(factor, n, 0, n-1, dr)
     assert weights == approx(ana.weights)
+
+
+def test_partial_integral():
+    wc = WeightCalculator()
+    n = 128
+    dr = 2**-7
+    factor = 0
+
+    w = wc.get_weights(factor, n, 10, 20, dr)
+    assert w.size == 128
+    w = wc.get_weights(factor, n, 1, 20, dr)
+    assert w.size == 128
+    w = wc.get_weights(factor, n, 0, 127, dr)
+    assert w.size == 128
