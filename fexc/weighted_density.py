@@ -53,6 +53,7 @@ class WeightedDensity:
                 self._ana.n,
                 i - self._radius_sphere, i + self._radius_sphere,
                 self._ana.dr)
+        # using a sparse matrix representation to speed up multiplication
         self._coefficients[WD.N3] = sparse.csr_matrix(wn3)
 
     def calc_density(self, which: WD, rho: (np.array, np.array)):
