@@ -36,6 +36,7 @@ class WeightedDensity:
         self._calc_n2_coeff()
         self._calc_n2v_coeff()
         self._calc_n11_coeff()
+        self._r = np.arange(self._ana.n)*self._ana.dr
 
     def _calc_n3_coeff(self):
         wn3 = np.zeros((self._ana.n, self._ana.n))
@@ -141,8 +142,19 @@ class WeightedDensity:
         self._coefficients[WD.N11] = sparse.csr_matrix(wn11 - wn2)
         self._coefficients[WD.PSI11] = sparse.csr_matrix(wpsi11)
 
-    def calc_density(self, which: WD, rho: (np.array, np.array)):
-        return self._coefficients[which].dot(rho[0]), self._coefficients[which].dot(rho[1])
+    def calc_density(self, which: WD, rho: np.array):
+        nn = self._coefficients[which].dot(rho)
+        fitrange = (self._ana.n - 3*self._radius_sphere, self._ana.n - self._radius_sphere)
+        extrapolate = (self._ana.n - self._radius_sphere, self._ana.n)
+        coeffs = np.polyfit(self._r[fitrange[0]:fitrange[1]], nn[fitrange[0]:fitrange[1]], 1)
+        nn[extrapolate[0]:extrapolate[1]] = coeffs[0] * self._r[extrapolate[0]:extrapolate[1]] + coeffs[1]
+        return nn
+
+    def calc_densities(self, which: list[WD], rho: np.array):
+        res = tuple()
+        for wd in which:
+            res = (*res, self._coefficients[wd].dot(rho))
+        return res
 
 
 def test_weighted_densities():
@@ -152,21 +164,17 @@ def test_weighted_densities():
     wc = WeightCalculator()
 
     wd = WeightedDensity(ana, wc)
-    rho = (np.ones(n), np.zeros(n))
+    rho = np.ones(n)
 
-    (n3, zeros) = wd.calc_density(WD.N3, rho)
-    assert np.all(zeros == np.zeros(n))
+    n3 = wd.calc_density(WD.N3, rho)
     # the edge is tricky, need to extrapolate
-    assert n3[:-8] == approx(np.ones(n-8)*np.pi/6)
+    assert n3 == approx(np.ones(n)*np.pi/6)
 
-    (n2, zeros) = wd.calc_density(WD.N2, rho)
-    assert np.all(zeros == np.zeros(n))
-    assert n2[:-8] == approx(np.ones(n-8)*np.pi)
+    n2 = wd.calc_density(WD.N2, rho)
+    assert n2 == approx(np.ones(n)*np.pi)
 
-    (n2v, zeros) = wd.calc_density(WD.N2V, rho)
-    assert np.all(zeros == np.zeros(n))
+    n2v = wd.calc_density(WD.N2V, rho)
     assert n2v == approx(np.zeros(n))
 
-    (n11, zeros) = wd.calc_density(WD.N11, rho)
-    assert np.all(zeros == np.zeros(n))
+    n11 = wd.calc_density(WD.N11, rho)
     assert n11 == approx(np.zeros(n))
