@@ -163,6 +163,7 @@ def test_weighted_densities():
     ana = Analysis(dr, n)
     wc = WeightCalculator()
 
+    # expect this to take a while
     wd = WeightedDensity(ana, wc)
     rho = np.ones(n)
 
