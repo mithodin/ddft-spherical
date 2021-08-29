@@ -156,7 +156,7 @@ class WeightedDensity:
 
 def test_weighted_densities():
     dr = 2**-3
-    n = 32
+    n = 128
     ana = Analysis(dr, n)
     wc = WeightCalculator()
 
@@ -172,7 +172,7 @@ def test_weighted_densities():
     assert n2 == approx(np.ones(n)*np.pi)
 
     n2v = wd.calc_density(WD.N2V, rho)
-    assert n2v == approx(np.zeros(n))
+    assert n2v == approx(np.zeros(n), abs=1e-10)
 
     n11 = wd.calc_density(WD.N11, rho)
-    assert n11 == approx(np.zeros(n))
+    assert n11 == approx(np.zeros(n), abs=1e-10)

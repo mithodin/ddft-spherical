@@ -7,6 +7,7 @@ from analysis import Analysis
 class WeightCalculator:
     def __init__(self):
         self.r = s.symbols('r', real=True)
+        self.r0, self.r1 = s.symbols('r0 r1', real=True)
         self.k = s.symbols('k', integer=True)
         self.dr = s.symbols('dr', real=True, positive=True)
         self.f = s.Function('f')
@@ -15,33 +16,38 @@ class WeightCalculator:
             (1+(self.r-self.k*self.dr)/self.dr, self.r < self.k*self.dr),
             (1-(self.r-self.k*self.dr)/self.dr, self.r < (self.k+1)*self.dr),
             (0, self.r >= (self.k+1)*self.dr))
+        self._int_cache = dict()
 
     def get_weights(self, prefactor, n: int, i0: int, i1: int, dr: float):
-        w0 = s.integrate(
-            prefactor*self.base_function,
-            (self.r, self.k*self.dr, (self.k+1)*self.dr)
-        ).replace(self.k, i0)
-        wm = s.integrate(
-            prefactor*self.base_function,
-            (self.r, (self.k-1)*self.dr, self.k*self.dr)
-        ).replace(self.k, i1)
-        w = s.integrate(
-            prefactor*self.base_function,
-            (self.r, (self.k-1)*self.dr, (self.k+1)*self.dr)
-        )
+        int = self._get_cached_integral(prefactor)
+        w0 = s.lambdify([self.dr, self.k], int.replace(self.r, (self.k+1)*self.dr)-int.replace(self.r, self.k*self.dr))
+        wm = s.lambdify([self.dr, self.k], int.replace(self.r, self.k*self.dr)-int.replace(self.r, (self.k-1)*self.dr))
+        w = s.lambdify([self.dr, self.k], int.replace(self.r, (self.k+1)*self.dr)-int.replace(self.r, (self.k-1)*self.dr))
         return np.array(
             [0 for _ in range(0, i0)]
-            + [s.N(w0.replace(self.dr, dr))]
-            + [s.N(w.replace(self.k, i).replace(self.dr, dr)) for i in range(i0+1, i1)]
-            + [s.N(wm.replace(self.dr, dr))]
+            + [w0(dr, i0)]
+            + [w(dr, i) for i in range(i0+1, i1)]
+            + [wm(dr, i1)]
             + [0 for _ in range(i1+1, n)],
             dtype=np.double
         )
 
+    def _get_cached_integral(self, prefactor):
+        int = 0
+        for term in s.expand(prefactor).lseries(self.r):
+            coeff, order = term.leadterm(self.r)
+            try:
+                nint = self._int_cache[order]
+            except KeyError:
+                nint = (self.r**order * self.base_function).integrate(self.r)
+                self._int_cache[order] = nint
+            int += coeff * nint
+        return int
+
 
 def test_volume_integral():
     wc = WeightCalculator()
-    n = 128
+    n = 512
     dr = 2**-7
     factor = wc.r**2*4*s.pi
     ana = Analysis(dr, n)
