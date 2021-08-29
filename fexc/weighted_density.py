@@ -150,11 +150,8 @@ class WeightedDensity:
         nn[extrapolate[0]:extrapolate[1]] = coeffs[0] * self._r[extrapolate[0]:extrapolate[1]] + coeffs[1]
         return nn
 
-    def calc_densities(self, which: list[WD], rho: np.array):
-        res = tuple()
-        for wd in which:
-            res = (*res, self._coefficients[wd].dot(rho))
-        return res
+    def calc_densities(self, which: list[WD], rho: np.array) -> list[np.array]:
+        return [self.calc_density(wd, rho) for wd in which]
 
 
 def test_weighted_densities():
