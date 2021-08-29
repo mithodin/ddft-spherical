@@ -23,9 +23,9 @@ class Rosenfeld(Fexc):
         phi = -n0*sy.log(1-n3)+(n1*n2-n1v*n2v)/(1-n3) + n2**3*(1-sy.Abs(n2v/n2))**3/(24*sy.pi*(1-n3)**2)
         self._phi = sy.lambdify([n2, n3, n2v, R], phi)
         self._dphi = {
-            WD.PSI2: sy.lambdify([n2, n3, n2v, R], phi.diff(n2)),
-            WD.PSI3: sy.lambdify([n2, n3, n2v, R], phi.diff(n3)),
-            WD.PSI2V: sy.lambdify([n2, n3, n2v, R], phi.diff(n2v)),
+            WD.PSI2: sy.lambdify([n2, n3, n2v, R], sy.simplify(phi.diff(n2))),
+            WD.PSI3: sy.lambdify([n2, n3, n2v, R], sy.simplify(phi.diff(n3))),
+            WD.PSI2V: sy.lambdify([n2, n3, n2v, R], sy.simplify(phi.diff(n2v))),
         }
 
     def fexc(self, rho: (np.array, np.array), wd: (np.array, np.array, np.array) = None) -> float:
@@ -71,7 +71,6 @@ def test_rf_expression():
 
     assert rf._phi(n2, n3, n2v, 0.5) == approx(-n0*np.log(1-n3)+(n1*n2-n1v*n2v)/(1-n3) + n2**3*(1-np.abs(n2v/n2))**3/(24*np.pi*(1-n3)**2))
 
-
 def test_fexc():
     dr = 2**-3
     n = 32
@@ -98,16 +97,19 @@ def test_fexc():
 
 
 def test_grad():
-    dr = 2**-4
-    n = 64
+    dr = 2**-5
+    n = 128
     ana = Analysis(dr, n)
     wc = WeightCalculator()
     wd = WeightedDensity(ana, wc)
     rf = Rosenfeld(ana, wd)
 
-    rho0 = 0.1
-    rho: np.array = np.ones(n)*rho0
+    sigma0 = 2.0
+    gauss = np.exp(-(np.arange(n)*dr/sigma0)**2/2)/sigma0/np.sqrt(2*np.pi)
+    rho: np.array = gauss
     zero = np.zeros(n)
+
+    analytic_gradient, _ = rf.d_fexc_d_rho((rho, zero))
 
     numeric_gradient = np.zeros(n)
     delta = 2**-10
@@ -118,7 +120,6 @@ def test_grad():
         rho_minus[i] -= delta/ana.weights[i]
         numeric_gradient[i] = (rf.fexc((rho_plus, zero)) - rf.fexc((rho_minus, zero)))/(2*delta)
 
-    analytic_gradient, _ = rf.d_fexc_d_rho((rho, zero))
     np.savetxt('test.dat', np.hstack((analytic_gradient.reshape(-1, 1), numeric_gradient.reshape(-1, 1))))
     assert analytic_gradient == approx(numeric_gradient)
 
