@@ -4,7 +4,6 @@ from analysis import Analysis
 from ddft import DDFT
 from cutoff import Cutoff
 from fexc.calculate_weights import WeightCalculator
-from fexc.fexc import Fexc
 from fexc.rosenfeld import Rosenfeld
 from fexc.weighted_density import WeightedDensity
 from initial import load_initial

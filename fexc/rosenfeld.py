@@ -1,7 +1,7 @@
 from analysis import Analysis
-from fexc import Fexc
-from calculate_weights import WeightCalculator
-from weighted_density import WeightedDensity, WD
+from fexc.fexc import Fexc
+from fexc.calculate_weights import WeightCalculator
+from fexc.weighted_density import WeightedDensity, WD
 import numpy as np
 import sympy as sy
 from pytest import approx

@@ -3,7 +3,7 @@ from enum import Enum, unique, auto
 from scipy import sparse
 from pytest import approx
 from analysis import Analysis
-from calculate_weights import WeightCalculator
+from fexc.calculate_weights import WeightCalculator
 
 
 @unique
