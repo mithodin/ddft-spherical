@@ -26,9 +26,9 @@ class DDFT:
         return self._rho_s, self._rho_d
 
     def j_exc(self):
-        d_fexc_d_rho = self._f_exc.d_fexc_d_rho([self._rho_s, self._rho_d])
+        d_fexc_d_rho = self._f_exc.d_fexc_d_rho((self._rho_s, self._rho_d))
         j_s = - self._rho_s * self._ana.gradient(d_fexc_d_rho[0])
-        j_d = - self._rho_s * self._ana.gradient(d_fexc_d_rho[1])
+        j_d = - self._rho_d * self._ana.gradient(d_fexc_d_rho[1])
         return j_s, j_d
 
 
