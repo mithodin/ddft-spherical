@@ -8,6 +8,7 @@ numpy = "*"
 pytest = "*"
 sympy = "*"
 scipy = "*"
+h5py = "*"
 
 [dev-packages]
 
