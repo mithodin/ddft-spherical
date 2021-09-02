@@ -1,7 +1,9 @@
 import sympy as s
 import numpy as np
-from pytest import approx
-from analysis import Analysis
+
+
+def get_coefficient_calculator(w_func, coeff, dr):
+    return lambda k: coeff*w_func(dr, k)
 
 
 class WeightCalculator:
@@ -19,52 +21,36 @@ class WeightCalculator:
         self._int_cache = dict()
 
     def get_weights(self, prefactor, n: int, i0: int, i1: int, dr: float):
-        int = self._get_cached_integral(prefactor)
-        w0 = s.lambdify([self.dr, self.k], int.replace(self.r, (self.k+1)*self.dr)-int.replace(self.r, self.k*self.dr))
-        wm = s.lambdify([self.dr, self.k], int.replace(self.r, self.k*self.dr)-int.replace(self.r, (self.k-1)*self.dr))
-        w = s.lambdify([self.dr, self.k], int.replace(self.r, (self.k+1)*self.dr)-int.replace(self.r, (self.k-1)*self.dr))
-        return np.array(
-            [0 for _ in range(0, i0)]
-            + [w0(dr, i0)]
-            + [w(dr, i) for i in range(i0+1, i1)]
-            + [wm(dr, i1)]
-            + [0 for _ in range(i1+1, n)],
-            dtype=np.double
-        )
+        w0, wm, w = self._get_cached_integral(prefactor, dr)
+        return np.hstack((
+            np.zeros(i0, dtype=np.double),
+            w0(i0),
+            np.fromiter((w(i) for i in range(i0+1, i1)), dtype=np.double),
+            wm(i1),
+            np.zeros(n-i1-1, dtype=np.double)
+        ))
 
-    def _get_cached_integral(self, prefactor):
-        int = 0
+    def _get_cached_integral(self, prefactor, dr):
+        w0 = []
+        wm = []
+        w = []
         for term in s.expand(prefactor).lseries(self.r):
             coeff, order = term.leadterm(self.r)
+            coeff = np.double(coeff)
             try:
-                nint = self._int_cache[order]
+                weights = self._int_cache[order]
             except KeyError:
                 nint = (self.r**order * self.base_function).integrate(self.r)
-                self._int_cache[order] = nint
-            int += coeff * nint
-        return int
-
-
-def test_volume_integral():
-    wc = WeightCalculator()
-    n = 512
-    dr = 2**-7
-    factor = wc.r**2*4*s.pi
-    ana = Analysis(dr, n)
-
-    weights = wc.get_weights(factor, n, 0, n-1, dr)
-    assert weights == approx(ana.weights)
-
-
-def test_partial_integral():
-    wc = WeightCalculator()
-    n = 128
-    dr = 2**-7
-    factor = 0
-
-    w = wc.get_weights(factor, n, 10, 20, dr)
-    assert w.size == 128
-    w = wc.get_weights(factor, n, 1, 20, dr)
-    assert w.size == 128
-    w = wc.get_weights(factor, n, 0, 127, dr)
-    assert w.size == 128
+                w0c = s.lambdify([self.dr, self.k], nint.replace(self.r, (self.k+1)*self.dr)-nint.replace(self.r, self.k*self.dr))
+                wmc = s.lambdify([self.dr, self.k], nint.replace(self.r, self.k*self.dr)-nint.replace(self.r, (self.k-1)*self.dr))
+                wc = s.lambdify([self.dr, self.k], nint.replace(self.r, (self.k+1)*self.dr)-nint.replace(self.r, (self.k-1)*self.dr))
+                weights = {
+                    'w0': w0c,
+                    'wm': wmc,
+                    'w': wc
+                }
+                self._int_cache[order] = weights
+            w0.append(get_coefficient_calculator(weights['w0'], coeff, dr))
+            wm.append(get_coefficient_calculator(weights['wm'], coeff, dr))
+            w.append(get_coefficient_calculator(weights['w'], coeff, dr))
+        return lambda k: sum([f(k) for f in w0]), lambda k: sum([f(k) for f in wm]), lambda k: sum([f(k) for f in w])
