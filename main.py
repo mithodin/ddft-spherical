@@ -8,14 +8,21 @@ from fexc.rosenfeld import Rosenfeld
 from fexc.weighted_density import WeightedDensity
 from initial import load_initial
 
-small_steps = 10**4
-big_steps = 100
-simulation_time = 1.0
+small_steps = 1
+big_steps = 10**6
+simulation_time = 10**-6
 
 if __name__ == "__main__":
+    print("*** initializing ***", file=sys.stderr)
     dr, num_bins, rho_self, rho_dist = load_initial("vanhove.h5")
 
+    #smaller box for testing
+    num_bins = 512
+    rho_self = rho_self[:num_bins]
+    rho_dist = rho_dist[:num_bins]
+
     analysis = Analysis(dr, num_bins)
+    print(" > this could take a while", file=sys.stderr)
     wc = WeightCalculator()
     wd = WeightedDensity(analysis, wc)
     f_exc = Rosenfeld(analysis, wd)
@@ -25,14 +32,19 @@ if __name__ == "__main__":
     rho_self = cutoff(rho_self)
     rho_dist = cutoff(rho_dist)
 
+    print(" > done.", file=sys.stderr)
+    print("*** starting integration ***", file=sys.stderr)
+
     ddft = DDFT(analysis, 1.0/small_steps/big_steps, f_exc, (rho_self, rho_dist))
-    for t in range(big_steps+1):
+    for t in range(int(simulation_time*big_steps)+1):
         norm_self = analysis.integrate(rho_self)
         norm_dist = analysis.integrate(rho_dist)
         np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1))),
                    header='# t = {}\n# norm = {:.30f}\t{:.30f}'.format(t / big_steps, norm_self, norm_dist), footer='\n', comments='')
-        print('big step: {}'.format(t), file=sys.stderr)
+        print(' > big step: {}'.format(t), file=sys.stderr)
         for tt in range(small_steps):
             rho_self, rho_dist = ddft.step()
             rho_self = cutoff(rho_self)
             rho_dist = cutoff(rho_dist)
+
+    print("*** done, have a nice day ***")
