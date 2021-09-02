@@ -1,7 +1,6 @@
 import numpy as np
 from enum import Enum, unique, auto
 from scipy import sparse
-from pytest import approx
 from analysis import Analysis
 from fexc.calculate_weights import WeightCalculator
 
@@ -41,10 +40,10 @@ class WeightedDensity:
     def _calc_n3_coeff(self):
         wn3 = np.zeros((self._ana.n, self._ana.n))
         wn3[0, :] = self._wc.get_weights(4*np.pi*self._wc.r**2, self._ana.n, 0, self._radius_sphere, self._ana.dr)
+        rp = self._wc.r
+        R = self._size_sphere/2
         for i in range(1, self._radius_sphere):
             r = i*self._ana.dr
-            rp = self._wc.r
-            R = self._size_sphere/2
             wn3[i, :] = self._wc.get_weights(
                     4*np.pi*self._wc.r**2,
                     self._ana.n,
@@ -152,40 +151,3 @@ class WeightedDensity:
 
     def calc_densities(self, which: list[WD], rho: np.array) -> list[np.array]:
         return [self.calc_density(wd, rho) for wd in which]
-
-
-def test_weighted_densities():
-    dr = 2**-3
-    n = 32
-    ana = Analysis(dr, n)
-    wc = WeightCalculator()
-
-    # expect this to take a while
-    wd = WeightedDensity(ana, wc)
-    rho = np.ones(n)
-
-    n3 = wd.calc_density(WD.N3, rho)
-    # the edge is tricky, need to extrapolate
-    assert n3 == approx(np.ones(n)*np.pi/6)
-
-    n2 = wd.calc_density(WD.N2, rho)
-    assert n2 == approx(np.ones(n)*np.pi)
-
-    n2v = wd.calc_density(WD.N2V, rho)
-    assert n2v == approx(np.zeros(n), abs=1e-10)
-
-    n11 = wd.calc_density(WD.N11, rho)
-    assert n11 == approx(np.zeros(n), abs=1e-10)
-
-    psi2 = wd.calc_density(WD.PSI2, rho)
-    assert psi2 == approx(np.ones(n)*np.pi)
-
-    psi3 = wd.calc_density(WD.PSI3, rho)
-    assert psi3 == approx(np.ones(n)*np.pi/6)
-
-    r = np.arange(n)*dr
-    R = 0.5
-    psi2v_ana = np.pi*(-(R - r)**2*abs(R - r) + (R + r)**3 + 3*(R + r)*(R**2 - r**2) - 3*(R**2 - r**2)*abs(R - r))/(3*r)
-    psi2v_ana[0] = np.pi
-    psi2v = wd.calc_density(WD.PSI2V, rho)
-    assert psi2v[:-8] == approx(psi2v_ana[:-8])
