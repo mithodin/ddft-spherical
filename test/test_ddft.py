@@ -25,3 +25,20 @@ def test_free_diffusion():
         rho, _ = ddft.step()
         f = diffusion.step(f)
         assert np.all(rho == f)
+
+
+def test_j_exc():
+    dr = 2**-7
+    n = 4096
+    dt = 10**-7
+    ana = Analysis(dr, n)
+    f_exc = Fexc(ana)
+
+    sigma0 = 5.0
+    gauss = np.exp(-(np.arange(n)*dr/sigma0)**2/2)/sigma0/np.sqrt(2*np.pi)
+    gauss /= ana.integrate(gauss)
+
+    ddft = DDFT(ana, dt, f_exc, (gauss, np.zeros(n)))
+    j_s, j_d = ddft.j_exc()
+    assert np.all(j_s == np.zeros(n))
+    assert np.all(j_d == np.zeros(n))

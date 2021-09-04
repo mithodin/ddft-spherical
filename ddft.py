@@ -13,7 +13,7 @@ class DDFT:
         self._rho_s = self._cutoff(rho0[0])
         self._rho_d = self._cutoff(rho0[1])
 
-    def step(self, f_ext: (np.array, np.array) = None) -> (np.array, np.array):
+    def step(self, f_ext: (np.array, np.array) = None) -> (np.array, np.array, np.array, np.array):
         j_exc = self.j_exc()
         j_s = - self._ana.gradient(self._rho_s) + j_exc[0]
         j_d = - self._ana.gradient(self._rho_d) + j_exc[1]
@@ -22,29 +22,10 @@ class DDFT:
             j_d += self._rho_d * f_ext[1]
         self._rho_s = self._cutoff(self._rho_s - self._ana.divergence(j_s) * self._dt)
         self._rho_d = self._cutoff(self._rho_d - self._ana.divergence(j_d) * self._dt)
-        return self._rho_s, self._rho_d
+        return self._rho_s, self._rho_d, j_s, j_d
 
     def j_exc(self):
         d_fexc_d_rho = self._f_exc.d_fexc_d_rho((self._rho_s, self._rho_d))
         j_s = - self._rho_s * self._ana.gradient(d_fexc_d_rho[0])
         j_d = - self._rho_d * self._ana.gradient(d_fexc_d_rho[1])
         return j_s, j_d
-
-
-def test_j_exc():
-    dr = 2**-7
-    n = 4096
-    dt = 10**-7
-    ana = Analysis(dr, n)
-    f_exc = Fexc(ana)
-
-    sigma0 = 5.0
-    gauss = np.exp(-(np.arange(n)*dr/sigma0)**2/2)/sigma0/np.sqrt(2*np.pi)
-    gauss /= ana.integrate(gauss)
-
-    ddft = DDFT(ana, dt, f_exc, (gauss, np.zeros(n)))
-    j_s, j_d = ddft.j_exc()
-    assert np.all(j_s == np.zeros(n))
-    assert np.all(j_d == np.zeros(n))
-
-
