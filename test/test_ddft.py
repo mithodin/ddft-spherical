@@ -22,7 +22,7 @@ def test_free_diffusion():
 
     f = gauss
     for _ in range(100):
-        rho, _ = ddft.step()
+        rho, _, _, _ = ddft.step()
         f = diffusion.step(f)
         assert np.all(rho == f)
 
