@@ -41,11 +41,13 @@ class Rosenfeld(Fexc):
         except TypeError:
             rho_tot = rho[0] + rho[1]
             n2, n3, n2v = self._wd.calc_densities([WD.N2, WD.N3, WD.N2V], rho_tot)
+        np.savetxt('out/wd.dat', np.hstack((n2.reshape(-1, 1), n3.reshape(-1, 1), n2v.reshape(-1, 1))))
 
         dphi = {wd: self._dphi[wd](n2, n3, n2v, self._R) for wd in [WD.PSI2, WD.PSI3, WD.PSI2V]}
+        np.savetxt('out/dphi.dat', np.hstack((dphi[WD.PSI2].reshape(-1, 1), dphi[WD.PSI3].reshape(-1, 1), dphi[WD.PSI2V].reshape(-1, 1))))
 
         psi2, psi3, psi2v = (self._wd.calc_density(wd, dphi[wd]) for wd in [WD.PSI2, WD.PSI3, WD.PSI2V])
-        s = psi2 + psi3 + psi2v
+        s = psi3 # + psi3 + psi2v
         return s, s
 
     def fexc_and_d_fexc(self, rho: (np.array, np.array)) -> (float, np.array, np.array):

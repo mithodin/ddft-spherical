@@ -141,13 +141,17 @@ class WeightedDensity:
         self._coefficients[WD.N11] = sparse.csr_matrix(wn11 - wn2)
         self._coefficients[WD.PSI11] = sparse.csr_matrix(wpsi11)
 
+    def _extrapolate(self, f: np.array, fitrange: (float, float), extrapolate: (float, float)) -> np.array:
+        offset = fitrange[1] - 1
+        x_fit = np.arange(*fitrange) - offset
+        x_extrapolate = np.arange(*extrapolate) - offset
+        slope = (x_fit*f[fitrange[0]:fitrange[1]]).sum() / (x_fit**2).sum()
+        f[extrapolate[0]:extrapolate[1]] = f[offset] + slope * x_extrapolate
+        return f
+
     def calc_density(self, which: WD, rho: np.array):
         nn = self._coefficients[which].dot(rho)
-        fitrange = (self._ana.n - 3*self._radius_sphere, self._ana.n - self._radius_sphere)
-        extrapolate = (self._ana.n - self._radius_sphere, self._ana.n)
-        coeffs = np.polyfit(self._r[fitrange[0]:fitrange[1]], nn[fitrange[0]:fitrange[1]], 1)
-        nn[extrapolate[0]:extrapolate[1]] = coeffs[0] * self._r[extrapolate[0]:extrapolate[1]] + coeffs[1]
-        return nn
+        return self._extrapolate(nn, (self._ana.n - 3*self._radius_sphere, self._ana.n - self._radius_sphere), (self._ana.n - self._radius_sphere, self._ana.n))
 
     def calc_densities(self, which: list[WD], rho: np.array) -> list[np.array]:
         return [self.calc_density(wd, rho) for wd in which]

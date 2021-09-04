@@ -43,3 +43,22 @@ def test_weighted_densities():
     psi2v = wd.calc_density(WD.PSI2V, rho)
     assert psi2v[:-8] == approx(psi2v_ana[:-8])
 
+
+def test_extrapolate():
+    dr = 2**-3
+    n = 32
+    ana = Analysis(dr, n)
+    wc = WeightCalculator()
+    wd = WeightedDensity(ana, wc)
+
+    f = np.arange(n) * dr
+    f_extrapolated = wd._extrapolate(f.copy(), (8, 17), (17, 32))
+    assert f_extrapolated == approx(f)
+
+    f = np.arange(n) * dr + 10.0
+    f_extrapolated = wd._extrapolate(f.copy(), (8, 17), (17, 32))
+    assert f_extrapolated == approx(f)
+
+    f = (np.arange(n) * dr)**2
+    f_extrapolated = wd._extrapolate(f.copy(), (8, 17), (17, 32))
+    assert f_extrapolated == approx(f)

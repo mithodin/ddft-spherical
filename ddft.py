@@ -22,7 +22,7 @@ class DDFT:
             j_d += self._rho_d * f_ext[1]
         self._rho_s = self._cutoff(self._rho_s - self._ana.divergence(j_s) * self._dt)
         self._rho_d = self._cutoff(self._rho_d - self._ana.divergence(j_d) * self._dt)
-        return self._rho_s, self._rho_d, j_s, j_d
+        return self._rho_s, self._rho_d, j_exc[0], j_exc[1]
 
     def j_exc(self):
         d_fexc_d_rho = self._f_exc.d_fexc_d_rho((self._rho_s, self._rho_d))
