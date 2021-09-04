@@ -14,10 +14,10 @@ class WeightCalculator:
         self.dr = s.symbols('dr', real=True, positive=True)
         self.f = s.Function('f')
         self.base_function = s.Piecewise(
-            (0, self.r < (self.k-1)*self.dr),
+            (0, self.r < self.k*self.dr - self.dr),
             (1+(self.r-self.k*self.dr)/self.dr, self.r < self.k*self.dr),
-            (1-(self.r-self.k*self.dr)/self.dr, self.r < (self.k+1)*self.dr),
-            (0, self.r >= (self.k+1)*self.dr))
+            (1-(self.r-self.k*self.dr)/self.dr, self.r < self.k*self.dr + self.dr),
+            (0, self.r >= self.k*self.dr + self.dr))
         self._int_cache = dict()
 
     def get_weights(self, prefactor, n: int, i0: int, i1: int, dr: float):
@@ -41,9 +41,9 @@ class WeightCalculator:
                 weights = self._int_cache[order]
             except KeyError:
                 nint = (self.r**order * self.base_function).integrate(self.r)
-                w0c = s.lambdify([self.dr, self.k], nint.replace(self.r, (self.k+1)*self.dr)-nint.replace(self.r, self.k*self.dr))
-                wmc = s.lambdify([self.dr, self.k], nint.replace(self.r, self.k*self.dr)-nint.replace(self.r, (self.k-1)*self.dr))
-                wc = s.lambdify([self.dr, self.k], nint.replace(self.r, (self.k+1)*self.dr)-nint.replace(self.r, (self.k-1)*self.dr))
+                w0c = s.lambdify([self.dr, self.k], nint.replace(self.r, self.k*self.dr + self.dr)-nint.replace(self.r, self.k*self.dr))
+                wmc = s.lambdify([self.dr, self.k], nint.replace(self.r, self.k*self.dr)-nint.replace(self.r, self.k*self.dr - self.dr))
+                wc = s.lambdify([self.dr, self.k], nint.replace(self.r, self.k*self.dr + self.dr)-nint.replace(self.r, self.k*self.dr - self.dr))
                 weights = {
                     'w0': w0c,
                     'wm': wmc,
