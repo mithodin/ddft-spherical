@@ -145,7 +145,7 @@ class WeightedDensity:
         offset = fitrange[1] - 1
         x_fit = np.arange(*fitrange) - offset
         x_extrapolate = np.arange(*extrapolate) - offset
-        slope = (x_fit*f[fitrange[0]:fitrange[1]]).sum() / (x_fit**2).sum()
+        slope = (x_fit*(f[fitrange[0]:fitrange[1]] - f[fitrange[1]-1])).sum() / (x_fit**2).sum()
         f[extrapolate[0]:extrapolate[1]] = f[offset] + slope * x_extrapolate
         return f
 

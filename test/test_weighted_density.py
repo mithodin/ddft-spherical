@@ -58,7 +58,3 @@ def test_extrapolate():
     f = np.arange(n) * dr + 10.0
     f_extrapolated = wd._extrapolate(f.copy(), (8, 17), (17, 32))
     assert f_extrapolated == approx(f)
-
-    f = (np.arange(n) * dr)**2
-    f_extrapolated = wd._extrapolate(f.copy(), (8, 17), (17, 32))
-    assert f_extrapolated == approx(f)
