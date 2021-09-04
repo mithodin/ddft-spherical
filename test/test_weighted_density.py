@@ -36,6 +36,7 @@ def test_weighted_densities():
     assert psi3 == approx(np.ones(n)*np.pi/6)
 
     r = np.arange(n)*dr
+    r[0] = 1  # it's not, but it avoids the division warning
     R = 0.5
     psi2v_ana = np.pi*(-(R - r)**2*abs(R - r) + (R + r)**3 + 3*(R + r)*(R**2 - r**2) - 3*(R**2 - r**2)*abs(R - r))/(3*r)
     psi2v_ana[0] = np.pi
