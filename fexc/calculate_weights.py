@@ -24,9 +24,9 @@ class WeightCalculator:
         w0, wm, w = self._get_cached_integral(prefactor, dr)
         return np.hstack((
             np.zeros(i0, dtype=np.double),
-            w0(i0),
-            np.fromiter((w(i) for i in range(i0+1, i1)), dtype=np.double),
-            wm(i1),
+            w0(np.longdouble(i0)),
+            np.fromiter((w(np.longdouble(i)) for i in range(i0+1, i1)), dtype=np.double),
+            wm(np.longdouble(i1)),
             np.zeros(n-i1-1, dtype=np.double)
         ))
 
