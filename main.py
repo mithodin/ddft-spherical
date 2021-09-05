@@ -10,7 +10,7 @@ from initial import load_initial
 
 small_steps = 1
 big_steps = 10**6
-simulation_time = 10**-6
+simulation_time = 10**-4
 
 if __name__ == "__main__":
     print("*** initializing ***", file=sys.stderr)
