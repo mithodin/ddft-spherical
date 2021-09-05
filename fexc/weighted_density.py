@@ -119,26 +119,23 @@ class WeightedDensity:
         wpsi11 = np.zeros((self._ana.n, self._ana.n))
         rp = self._wc.r
         R = self._size_sphere/2
-        wn11[0, :] = np.zeros(self._ana.n)
         wpsi11[0, self._radius_sphere] = -4./3.*np.pi*R**2
         for i in range(1, self._ana.n - self._radius_sphere):
             r = i*self._ana.dr
             r0 = np.abs(i-self._radius_sphere)
             wn11[i, :] = self._wc.get_weights(
-                np.pi/(4*r**3*R)*rp*(4*r**2*rp**2-(r**2+rp**2-R**2)**2),
+                np.pi/(4*r**3*R)*rp*(4*r**2*rp**2-(r**2+rp**2-R**2)**2) - 2*np.pi*R/(3*r)*rp,
                 self._ana.n,
                 r0, i + self._radius_sphere,
                 self._ana.dr
             )
             wpsi11[i, :] = self._wc.get_weights(
-                np.pi/r*rp**2*((4*rp**2*r**2-(rp**2+r**2-R**2)**2)/(4*rp**3*R) -2*R/(3*rp)),
+                np.pi/r*rp**2*((4*rp**2*r**2-(rp**2+r**2-R**2)**2)/(4*rp**3*R) - 2*R/(3*rp)),
                 self._ana.n,
                 r0, i + self._radius_sphere,
                 self._ana.dr
             )
-        wn2 = self._coefficients[WD.N2].toarray() / 3
-        wn2[0, :] = np.zeros(self._ana.n)
-        self._coefficients[WD.N11] = sparse.csr_matrix(wn11 - wn2)
+        self._coefficients[WD.N11] = sparse.csr_matrix(wn11)
         self._coefficients[WD.PSI11] = sparse.csr_matrix(wpsi11)
 
     def _extrapolate(self, f: np.array, fitrange: (float, float), extrapolate: (float, float)) -> np.array:
