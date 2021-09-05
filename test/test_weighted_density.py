@@ -14,26 +14,27 @@ def test_weighted_densities():
 
     # expect this to take a while
     wd = WeightedDensity(ana, wc)
-    rho = np.ones(n)
+    rho_bulk = 0.1
+    rho = rho_bulk * np.ones(n)
 
     n3 = wd.calc_density(WD.N3, rho)
     # the edge is tricky, need to extrapolate
-    assert n3 == approx(np.ones(n)*np.pi/6)
+    assert n3 == approx(rho_bulk * np.ones(n)*np.pi/6)
 
     n2 = wd.calc_density(WD.N2, rho)
-    assert n2 == approx(np.ones(n)*np.pi)
+    assert n2 == approx(rho_bulk * np.ones(n)*np.pi)
 
     n2v = wd.calc_density(WD.N2V, rho)
-    assert n2v == approx(np.zeros(n), abs=1e-10)
+    assert n2v == approx(np.zeros(n), abs=1e-13)
 
     n11 = wd.calc_density(WD.N11, rho)
-    assert n11 == approx(np.zeros(n), abs=1e-10)
+    assert n11 == approx(np.zeros(n), abs=1e-13)
 
     psi2 = wd.calc_density(WD.PSI2, rho)
-    assert psi2 == approx(np.ones(n)*np.pi)
+    assert psi2 == approx(rho_bulk * np.ones(n)*np.pi)
 
     psi3 = wd.calc_density(WD.PSI3, rho)
-    assert psi3 == approx(np.ones(n)*np.pi/6)
+    assert psi3 == approx(rho_bulk * np.ones(n)*np.pi/6)
 
     r = np.arange(n)*dr
     r[0] = 1  # it's not, but it avoids the division warning
@@ -41,7 +42,7 @@ def test_weighted_densities():
     psi2v_ana = np.pi*(-(R - r)**2*abs(R - r) + (R + r)**3 + 3*(R + r)*(R**2 - r**2) - 3*(R**2 - r**2)*abs(R - r))/(3*r)
     psi2v_ana[0] = np.pi
     psi2v = wd.calc_density(WD.PSI2V, rho)
-    assert psi2v[:-8] == approx(psi2v_ana[:-8])
+    assert psi2v[:-8] == approx(rho_bulk * psi2v_ana[:-8])
 
 
 def test_extrapolate():
