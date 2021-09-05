@@ -68,10 +68,10 @@ def test_grad():
     delta = 2**-10
     for i in range(n):
         rho_plus = rho.copy()
-        rho_plus[i] += delta/ana.weights[i] #technically, we move the whole spherical shell, so the numerical gradient differs from the actual functional derivative
+        rho_plus[i] += delta/ana.weights[i]  # technically, we move the whole spherical shell, so the numerical gradient differs from the actual functional derivative
         rho_minus = rho.copy()
         rho_minus[i] -= delta/ana.weights[i]
         numeric_gradient[i] = (rf.fexc((rho_plus, zero)) - rf.fexc((rho_minus, zero)))/(2*delta)
 
     np.savetxt('test.dat', np.hstack((analytic_gradient.reshape(-1, 1), numeric_gradient.reshape(-1, 1))))
-    assert analytic_gradient[16:-64] == approx(numeric_gradient[16:-64],rel=10**-2) # near the origin, things are complicated, and near the edge, we extrapolate, so the weights are off in the numerical gradient
+    assert analytic_gradient[16:-64] == approx(numeric_gradient[16:-64], rel=10**-2)  # near the origin, things are complicated, and near the edge, we extrapolate, so the weights are off in the numerical gradient
