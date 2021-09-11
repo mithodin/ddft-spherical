@@ -4,6 +4,7 @@ from analysis import Analysis
 from ddft import DDFT
 from cutoff import Cutoff
 from fexc.calculate_weights import WeightCalculator
+from fexc.fexc import Fexc
 from fexc.rosenfeld import Rosenfeld
 from fexc.weighted_density import WeightedDensity
 from initial import load_initial
@@ -23,10 +24,10 @@ if __name__ == "__main__":
 
     analysis = Analysis(dr, num_bins)
     print(" > this could take a while", file=sys.stderr)
-    wc = WeightCalculator()
-    wd = WeightedDensity(analysis, wc)
-    f_exc = Rosenfeld(analysis, wd)
-    #f_exc = Fexc(analysis)
+    #wc = WeightCalculator()
+    #wd = WeightedDensity(analysis, wc)
+    #f_exc = Rosenfeld(analysis, wd)
+    f_exc = Fexc(analysis)
     cutoff = lambda a: Cutoff(1e-70).cutoff(a)
 
     rho_self = cutoff(rho_self)
