@@ -22,7 +22,7 @@ def test_rf_expression():
     n1 = n2 / (2*np.pi)
     n1v = n2v / (2*np.pi)
 
-    assert rf._phi(n2, n3, n2v, 0.5) == approx(-n0*np.log(1-n3)+(n1*n2-n1v*n2v)/(1-n3) + n2**3*(1-np.abs(n2v/n2))**3/(24*np.pi*(1-n3)**2))
+    assert rf._phi(n2, n3, n2v) == approx(-n0*np.log(1-n3)+(n1*n2-n1v*n2v)/(1-n3) + n2**3*(1-np.abs(n2v/n2))**3/(24*np.pi*(1-n3)**2))
 
 
 def test_rosenfeld_analytic():
@@ -47,7 +47,7 @@ def test_rosenfeld_analytic():
     wd = WeightedDensity(ana, wc)
     rf = Rosenfeld(ana, wd)
 
-    phi_numeric = rf._phi(n2(r), n3(r), n2v(r), 0.5)
+    phi_numeric = rf._phi(n2(r), n3(r), n2v(r))
     rosenfeld_numeric = rf.fexc((rho_discrete, np.zeros(n)))
 
     phi_analytic = -n0(r)*np.log(1-n3(r))+(n1(r)*n2(r)-n1v(r)*n2v(r))/(1-n3(r))+n2(r)**3*(1-np.abs(n2v(r)/n2(r)))**3/(24*np.pi*(1-n3(r))**2)

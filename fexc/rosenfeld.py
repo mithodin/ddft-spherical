@@ -9,21 +9,19 @@ class Rosenfeld(Fexc):
     def __init__(self, analysis: Analysis, wd: WeightedDensity):
         super(Rosenfeld, self).__init__(analysis)
         self._wd = wd
-        self._R = 0.5
         self._calc_functional_expressions()
 
     def _calc_functional_expressions(self):
         n2, n3, n2v = sy.symbols("n2 n3 n2v", real=True)
-        R = sy.symbols("R", real=True)
-        n1 = n2 / (4*sy.pi*R)
-        n1v = n2v / (4*sy.pi*R)
-        n0 = n2 / (4*sy.pi*R**2)
-        phi = -n0*sy.log(1-n3)+(n1*n2-n1v*n2v)/(1-n3) + n2**3*(1-sy.Abs(n2v/n2))**3/(24*sy.pi*(1-n3)**2)
-        self._phi = sy.lambdify([n2, n3, n2v, R], phi)
+        n1 = n2 / (2*sy.pi)
+        n1v = n2v / (2*sy.pi)
+        n0 = n2 / sy.pi
+        phi = sy.simplify(-n0*sy.log(1-n3)+(n1*n2-n1v*n2v)/(1-n3) + n2**3*(1-sy.Abs(n2v/n2))**3/(24*sy.pi*(1-n3)**2))
+        self._phi = sy.lambdify([n2, n3, n2v], phi)
         self._dphi = {
-            WD.PSI2: sy.lambdify([n2, n3, n2v, R], sy.simplify(phi.diff(n2))),
-            WD.PSI3: sy.lambdify([n2, n3, n2v, R], sy.simplify(phi.diff(n3))),
-            WD.PSI2V: sy.lambdify([n2, n3, n2v, R], sy.simplify(phi.diff(n2v))),
+            WD.PSI2: sy.lambdify([n2, n3, n2v], sy.simplify(phi.diff(n2))),
+            WD.PSI3: sy.lambdify([n2, n3, n2v], sy.simplify(phi.diff(n3))),
+            WD.PSI2V: sy.lambdify([n2, n3, n2v], sy.simplify(phi.diff(n2v))),
         }
 
     def fexc(self, rho: (np.array, np.array), wd: (np.array, np.array, np.array) = None) -> float:
@@ -32,7 +30,7 @@ class Rosenfeld(Fexc):
         except TypeError:
             rho_tot = rho[0] + rho[1]
             n2, n3, n2v = self._wd.calc_densities([WD.N2, WD.N3, WD.N2V], rho_tot)
-        phi = self._phi(n2, n3, n2v, self._R)
+        phi = self._phi(n2, n3, n2v)
         return self._ana.integrate(phi)
 
     def d_fexc_d_rho(self, rho: (np.array, np.array), wd: (np.array, np.array, np.array) = None) -> (np.array, np.array):
@@ -43,7 +41,7 @@ class Rosenfeld(Fexc):
             n2, n3, n2v = self._wd.calc_densities([WD.N2, WD.N3, WD.N2V], rho_tot)
         np.savetxt('./wd.dat', np.hstack((n2.reshape(-1, 1), n3.reshape(-1, 1), n2v.reshape(-1, 1))))
 
-        dphi = {wd: self._dphi[wd](n2, n3, n2v, self._R) for wd in [WD.PSI2, WD.PSI3, WD.PSI2V]}
+        dphi = {wd: self._dphi[wd](n2, n3, n2v) for wd in [WD.PSI2, WD.PSI3, WD.PSI2V]}
         np.savetxt('./dphi.dat', np.hstack((dphi[WD.PSI2].reshape(-1, 1), dphi[WD.PSI3].reshape(-1, 1), dphi[WD.PSI2V].reshape(-1, 1))))
 
         psi2, psi3, psi2v = (self._wd.calc_density(wd, dphi[wd]) for wd in [WD.PSI2, WD.PSI3, WD.PSI2V])
