@@ -82,9 +82,9 @@ def test_weighted_densities():
 
     psi11 = sympy.lambdify([r], sympy.Piecewise(
         (-4*sympy.pi/3*R**2*rho.replace(rp,R), sympy.Eq(r, 0)),
-        (sympy.pi/R*sympy.integrate((4*rp*R**2-rp**3)/(4*R)-2*R*rp/3, (rp, sympy.Abs(r-R), r+R)), sympy.Eq(r, R)),
-        (sympy.pi/r*sympy.integrate((4*rp**2*r**2-(rp**2+r**2-R**2)**2)/(4*rp*R)-2*R*rp/3, (rp, sympy.Abs(r-R), r+R)), True)
-    ))
+        (sympy.pi/R*sympy.integrate(rho*((4*rp*R**2-rp**3)/(4*R)-2*R*rp/3), (rp, sympy.Abs(r-R), r+R)), sympy.Eq(r, R)),
+        (sympy.pi/r*sympy.integrate(rho*((4*rp**2*r**2-(rp**2+r**2-R**2)**2)/(4*rp*R)-2*R*rp/3), (rp, sympy.Abs(r-R), r+R)), True)
+    ), modules=[{'Si': np.vectorize(lambda x: np.float64(sympy.N(sympy.Si(x))))}, 'scipy', 'numpy'])
 
     dr = 2 ** -6
     n = 256
