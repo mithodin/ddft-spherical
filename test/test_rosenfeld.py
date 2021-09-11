@@ -1,10 +1,12 @@
 import numpy as np
+import sympy
 from pytest import approx
 
 from analysis import Analysis
 from fexc.calculate_weights import WeightCalculator
 from fexc.rosenfeld import Rosenfeld
 from fexc.weighted_density import WeightedDensity
+from weightend_density_analytic import calculate_analytic
 
 
 def test_rf_expression():
@@ -21,6 +23,38 @@ def test_rf_expression():
     n1v = n2v / (2*np.pi)
 
     assert rf._phi(n2, n3, n2v, 0.5) == approx(-n0*np.log(1-n3)+(n1*n2-n1v*n2v)/(1-n3) + n2**3*(1-np.abs(n2v/n2))**3/(24*np.pi*(1-n3)**2))
+
+
+def test_rosenfeld_analytic():
+    R = sympy.Rational(1, 2)
+    r, rp = sympy.symbols('r rp', real=True)
+
+    rho = sympy.Rational(2, 10) + sympy.sin(sympy.pi*rp)/1000
+    rho_eval = sympy.lambdify([rp], rho)
+
+    n11, n2, n2v, n3, psi11, psi2v = calculate_analytic(R, r, rp, rho)
+    n1 = lambda r: n2(r)/(4*np.pi*np.float128(R))
+    n0 = lambda r: n2(r)/(4*np.pi*np.float128(R**2))
+    n1v = lambda r: n2v(r)/(4*np.pi*np.float128(R))
+
+    dr = 2 ** -6
+    n = 256
+    r = np.array(np.arange(n)*dr, dtype=np.longdouble)
+    rho_discrete = rho_eval(r)
+
+    ana = Analysis(dr, n)
+    wc = WeightCalculator()
+    wd = WeightedDensity(ana, wc)
+    rf = Rosenfeld(ana, wd)
+
+    phi_numeric = rf._phi(n2(r), n3(r), n2v(r), 0.5)
+    rosenfeld_numeric = rf.fexc((rho_discrete, np.zeros(n)))
+
+    phi_analytic = -n0(r)*np.log(1-n3(r))+(n1(r)*n2(r)-n1v(r)*n2v(r))/(1-n3(r))+n2(r)**3*(1-np.abs(n2v(r)/n2(r)))**3/(24*np.pi*(1-n3(r))**2)
+    rosenfeld_analytic = ana.integrate(phi_analytic)
+
+    assert phi_numeric == approx(phi_analytic)
+    assert rosenfeld_numeric == approx(rosenfeld_analytic, rel=1e-2)
 
 
 def test_fexc():
