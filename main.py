@@ -62,4 +62,8 @@ if __name__ == "__main__":
                 sys.exit(1)
         t0 += simulation_time
         log(" > {} phase done".format(phase))
+    norm_self = analysis.integrate(rho_self)
+    norm_dist = analysis.integrate(rho_dist)
+    np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1), j_s.reshape(-1, 1), j_d.reshape(-1, 1))),
+               header='# t = {}\n# norm = {:.30f}\t{:.30f}'.format(t0, norm_self, norm_dist), footer='\n', comments='')
     log("*** done, have a nice day ***")
