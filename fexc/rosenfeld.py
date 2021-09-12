@@ -16,7 +16,7 @@ class Rosenfeld(Fexc):
         n1 = n2 / (2*sy.pi)
         n1v = n2v / (2*sy.pi)
         n0 = n2 / sy.pi
-        phi = sy.simplify(-n0*sy.log(1-n3)+(n1*n2-n1v*n2v)/(1-n3) + n2**3*(1-sy.Abs(n2v/n2))**3/(24*sy.pi*(1-n3)**2))
+        phi = sy.simplify(-n0*sy.log(1-n3)+(n1*n2-n1v*n2v)/(1-n3) + (n2-n2v**2/n2)**3/(24*sy.pi*(1-n3)**2))
         self._phi = sy.lambdify([n2, n3, n2v], phi)
         self._dphi = {
             WD.PSI2: sy.lambdify([n2, n3, n2v], sy.simplify(phi.diff(n2))),
