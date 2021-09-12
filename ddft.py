@@ -20,6 +20,7 @@ class DDFT:
         if f_ext is not None:
             j_s += self._rho_s * f_ext[0]
             j_d += self._rho_d * f_ext[1]
+        self.boundary_condition(j_s, j_d)
         self._rho_s[:] = self._cutoff(self._rho_s - self._ana.divergence(j_s) * self._dt)
         self._rho_d[:] = self._cutoff(self._rho_d - self._ana.divergence(j_d) * self._dt)
         return self._rho_s, self._rho_d, j_s, j_d
@@ -29,3 +30,9 @@ class DDFT:
         j_s = - self._rho_s * self._ana.gradient(d_fexc_d_rho[0])
         j_d = - self._rho_d * self._ana.gradient(d_fexc_d_rho[1])
         return j_s, j_d
+
+    def boundary_condition(self, j_s, j_d):
+        size = 10
+        fade_out = np.hstack((np.flip(np.arange(size, dtype=np.float64))/(size-1),0))
+        j_s[-size-1:] *= fade_out
+        j_d[-size-1:] *= fade_out
