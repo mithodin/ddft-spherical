@@ -18,11 +18,9 @@ if __name__ == "__main__":
     dr, num_bins, rho_self, rho_dist = load_initial("vanhove.h5")
 
     analysis = Analysis(dr, num_bins)
-    print(" > this could take a while", file=sys.stderr)
-    #wc = WeightCalculator()
-    #wd = WeightedDensity(analysis, wc)
-    #f_exc = Rosenfeld(analysis, wd)
-    f_exc = Fexc(analysis)
+    wc = WeightCalculator()
+    wd = WeightedDensity(analysis, wc)
+    f_exc = Rosenfeld(analysis, wd)
     cutoff = lambda a: Cutoff(1e-70).cutoff(a)
 
     rho_self = cutoff(rho_self)
