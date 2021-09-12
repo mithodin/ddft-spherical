@@ -17,11 +17,6 @@ if __name__ == "__main__":
     print("*** initializing ***", file=sys.stderr)
     dr, num_bins, rho_self, rho_dist = load_initial("vanhove.h5")
 
-    #smaller box for testing
-    num_bins = 512
-    rho_self = rho_self[:num_bins]
-    rho_dist = rho_dist[:num_bins]
-
     analysis = Analysis(dr, num_bins)
     print(" > this could take a while", file=sys.stderr)
     #wc = WeightCalculator()
