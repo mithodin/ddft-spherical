@@ -10,8 +10,8 @@ class DDFT:
         self._dt = dt
         self._f_exc = f_exc
         self._cutoff = (lambda arr: cutoff.cutoff(arr)) if cutoff is not None else (lambda arr: arr)
-        self._rho_s = self._cutoff(rho0[0])
-        self._rho_d = self._cutoff(rho0[1])
+        self._rho_s = self._cutoff(rho0[0]).copy()
+        self._rho_d = self._cutoff(rho0[1]).copy()
 
     def step(self, f_ext: (np.array, np.array) = None) -> (np.array, np.array, np.array, np.array):
         j_exc = self.j_exc()
