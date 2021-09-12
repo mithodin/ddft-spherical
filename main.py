@@ -4,17 +4,28 @@ from analysis import Analysis
 from ddft import DDFT
 from cutoff import Cutoff
 from fexc.calculate_weights import WeightCalculator
-from fexc.fexc import Fexc
 from fexc.rosenfeld import Rosenfeld
 from fexc.weighted_density import WeightedDensity
 from initial import load_initial
+from tqdm import tqdm
 
-small_steps = 10**4
-big_steps = 10**2
-simulation_time = 1.0
+timesteps = {
+    'initial': {
+        'small_steps': 10**5,
+        'big_steps': 10**2,
+        'simulation_time': 10**-2
+    },
+    'main': {
+        'small_steps': 10**4,
+        'big_steps': 10**2,
+        'simulation_time': 1.0 - 10**-2
+    }
+}
+
+log = lambda *args: print(*args, file=sys.stderr)
 
 if __name__ == "__main__":
-    print("*** initializing ***", file=sys.stderr)
+    log("*** initializing ***")
     dr, num_bins, rho_self, rho_dist = load_initial("vanhove.h5")
 
     analysis = Analysis(dr, num_bins)
@@ -26,22 +37,29 @@ if __name__ == "__main__":
     rho_self = cutoff(rho_self)
     rho_dist = cutoff(rho_dist)
 
-    print(" > done.", file=sys.stderr)
-    print("*** starting integration ***", file=sys.stderr)
+    log(" > done.")
+    log("*** starting integration ***")
 
     j_s = np.zeros(num_bins)
     j_d = np.zeros(num_bins)
-    ddft = DDFT(analysis, 1.0/small_steps/big_steps, f_exc, (rho_self, rho_dist))
-    for t in range(int(simulation_time*big_steps)+1):
-        norm_self = analysis.integrate(rho_self)
-        norm_dist = analysis.integrate(rho_dist)
-        np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1), j_s.reshape(-1, 1), j_d.reshape(-1, 1))),
-                   header='# t = {}\n# norm = {:.30f}\t{:.30f}'.format(t / big_steps, norm_self, norm_dist), footer='\n', comments='')
-        print(' > big step: {}'.format(t), file=sys.stderr)
-        for tt in range(small_steps):
-            rho_self, rho_dist, j_s, j_d = ddft.step()
-        if not (np.all(np.isfinite(rho_self)) and np.all(np.isfinite(rho_dist))):
-            print("ERROR: invalid number detected in rho", file=sys.stderr)
-            sys.exit(1)
 
-    print("*** done, have a nice day ***", file=sys.stderr)
+    t0 = 0
+    for phase in timesteps.keys():
+        log(" > {} phase".format(phase))
+        small_steps = timesteps[phase]['small_steps']
+        big_steps = timesteps[phase]['big_steps']
+        simulation_time = timesteps[phase]['simulation_time']
+        ddft = DDFT(analysis, 1.0/small_steps/big_steps, f_exc, (rho_self, rho_dist), Cutoff(1e-70))
+        for t in tqdm(range(int(simulation_time*big_steps)), position=0, desc='big steps', file=sys.stderr):
+            norm_self = analysis.integrate(rho_self)
+            norm_dist = analysis.integrate(rho_dist)
+            np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1), j_s.reshape(-1, 1), j_d.reshape(-1, 1))),
+                       header='# t = {}\n# norm = {:.30f}\t{:.30f}'.format(t / big_steps + t0, norm_self, norm_dist), footer='\n', comments='')
+            for tt in tqdm(range(small_steps), position=1, desc='small steps', file=sys.stderr):
+                rho_self, rho_dist, j_s, j_d = ddft.step()
+            if not (np.all(np.isfinite(rho_self)) and np.all(np.isfinite(rho_dist))):
+                log("ERROR: invalid number detected in rho")
+                sys.exit(1)
+        t0 += simulation_time
+        log(" > {} phase done".format(phase))
+    log("*** done, have a nice day ***")
