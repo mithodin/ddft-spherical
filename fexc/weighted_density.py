@@ -1,4 +1,8 @@
+import os
+import sys
+
 import numpy as np
+import hashlib
 from enum import Enum, unique, auto
 from scipy import sparse
 from analysis import Analysis
@@ -24,6 +28,9 @@ class WD(Enum):
 
 
 class WeightedDensity:
+    _cachedir = './.cache/'
+    _version = 1
+
     def __init__(self, analysis: Analysis, wc: WeightCalculator, size_sphere: float = 1.0):
         self._ana = analysis
         self._size_sphere = size_sphere
@@ -31,11 +38,32 @@ class WeightedDensity:
         self._radius_sphere = int(size_sphere / analysis.dr) // 2  # hope you chose values that work
         self._coefficients = dict()
         self._wc = wc
-        self._calc_n3_coeff()
-        self._calc_n2_coeff()
-        self._calc_n2v_coeff()
-        self._calc_n11_coeff()
+        self._calc_coefficients()
         self._r = np.arange(self._ana.n)*self._ana.dr
+
+    def _calc_coefficients(self):
+        signature = "{n:.0f}-{dr:.10e}-{r_sphere:.0f}-{version:.0f}".format(n=self._ana.n, dr=self._ana.dr, r_sphere=self._radius_sphere, version=self._version)
+        filename = self._get_filename(signature)
+        try:
+            print(" > trying to load weights from cache", file=sys.stderr)
+            with np.load(filename) as cached:
+                for wd in WD:
+                    self._coefficients[wd] = sparse.csr_matrix(cached["{}".format(wd)])
+            print(" > cached weights loaded successfully", file=sys.stderr)
+        except:
+            print(" > cache not found or error loading, calculating weights", file=sys.stderr)
+            self._calc_n3_coeff()
+            self._calc_n2_coeff()
+            self._calc_n2v_coeff()
+            self._calc_n11_coeff()
+            weights = {"{}".format(wd): self._coefficients[wd].toarray() for wd in WD}
+            if not os.path.isdir(self._cachedir):
+                os.mkdir(self._cachedir)
+            np.savez_compressed(filename, **weights)
+
+    def _get_filename(self, signature):
+        hash = hashlib.sha1(signature.encode('utf-8')).hexdigest()
+        return "{cache}/{hash}.npz".format(hash=hash, cache=self._cachedir)
 
     def _calc_n3_coeff(self):
         wn3 = np.zeros((self._ana.n, self._ana.n))
