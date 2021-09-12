@@ -9,9 +9,9 @@ from fexc.rosenfeld import Rosenfeld
 from fexc.weighted_density import WeightedDensity
 from initial import load_initial
 
-small_steps = 1
-big_steps = 10**6
-simulation_time = 10**-4
+small_steps = 10**4
+big_steps = 10**2
+simulation_time = 1.0
 
 if __name__ == "__main__":
     print("*** initializing ***", file=sys.stderr)
@@ -40,8 +40,6 @@ if __name__ == "__main__":
         print(' > big step: {}'.format(t), file=sys.stderr)
         for tt in range(small_steps):
             rho_self, rho_dist, j_s, j_d = ddft.step()
-            rho_self = cutoff(rho_self)
-            rho_dist = cutoff(rho_dist)
         if not (np.all(np.isfinite(rho_self)) and np.all(np.isfinite(rho_dist))):
             print("ERROR: invalid number detected in rho", file=sys.stderr)
             sys.exit(1)
