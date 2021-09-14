@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import sparse
 
 
 class Analysis:
@@ -8,10 +9,24 @@ class Analysis:
         self.__init_weights()
 
     def __init_weights(self):
-        self.weights = (6 * np.arange(self.n) ** 2 + 1) * 2.0
+        n = self.n
+        dr = self.dr
+
+        self.weights = (6 * np.arange(n) ** 2 + 1) * 2.0
         self.weights[0] = 1
-        self.weights[-1] = (6 * (self.n - 1) ** 2 - 4 * (self.n - 1) + 1)
-        self.weights *= self.dr ** 3 * np.pi / 3
+        self.weights[-1] = (6 * (n - 1) ** 2 - 4 * (n - 1) + 1)
+        self.weights *= dr ** 3 * np.pi / 3
+
+        weights = self.weights
+        div_op = np.zeros((n, n))
+        div_op[0, 1] = -weights[0]
+        div_op[-1, -2] = (n-2)**2/weights[-1]
+        div_op[-1, -1] = -n**2/weights[-1]
+        for k in range(1, n-1):
+            div_op[k, k-1] = (k-1)**2/weights[k]
+            div_op[k, k+1] = -(k+1)**2/weights[k]
+        div_op *= -2*np.pi*dr**2
+        self._div_op = sparse.csr_matrix(div_op)
 
     def integrate(self, f: np.array):
         return np.sum(f * self.weights)
@@ -28,12 +43,4 @@ class Analysis:
         return res
 
     def divergence(self, f):
-        weights = self.weights
-        dr = self.dr
-        n = self.n
-        fk2 = f*np.arange(n)**2
-        div = (np.roll(fk2, 1) - np.roll(fk2, -1))/weights
-        div[0] = -fk2[1]/weights[0]
-        div[-1] = (fk2[-2] - fk2[-1]/(n-1)**2*n**2)/weights[-1]
-        # there is a factor of /2 here that I do not entirely understand
-        return -2*np.pi*dr**2*div
+        return self._div_op.dot(f)
