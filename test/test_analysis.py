@@ -57,4 +57,6 @@ def test_divergence():
     ana = Analysis(dr, n)
 
     # edges are special, disregard them
-    assert ana.divergence(j)[15:-5] == approx((np.zeros(n-20) + 1.0), rel=10**-3)
+    assert ana.divergence(j)[:-1] == approx(np.ones(n-1))
+
+    print(ana._div_op)
