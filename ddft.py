@@ -20,9 +20,11 @@ class DDFT:
         if f_ext is not None:
             j_s += self._rho_s * f_ext[0]
             j_d += self._rho_d * f_ext[1]
-        self.boundary_condition(j_s, j_d)
-        self._rho_s[:] = self._cutoff(self._rho_s - self._ana.divergence(j_s) * self._dt)
-        self._rho_d[:] = self._cutoff(self._rho_d - self._ana.divergence(j_d) * self._dt)
+        d_rho_s = - self._ana.divergence(j_s) * self._dt
+        d_rho_d = - self._ana.divergence(j_d) * self._dt
+        self.boundary_condition(d_rho_s, d_rho_d)
+        self._rho_s[:] = self._cutoff(self._rho_s + d_rho_s)
+        self._rho_d[:] = self._cutoff(self._rho_d + d_rho_d)
         return self._rho_s, self._rho_d, j_s, j_d
 
     def j_exc(self):
@@ -31,8 +33,10 @@ class DDFT:
         j_d = - self._rho_d * self._ana.gradient(d_fexc_d_rho[1])
         return j_s, j_d
 
-    def boundary_condition(self, j_s, j_d):
-        size = 10
-        fade_out = np.hstack((np.flip(np.arange(size, dtype=np.float64))/(size-1),0))
-        j_s[-size-1:] *= fade_out
-        j_d[-size-1:] *= fade_out
+    def boundary_condition(self, d_rho_s, d_rho_d):
+        size_zero = int(2./self._ana.dr)
+        size_fade = int(2./self._ana.dr)
+        fade_out = np.zeros((size_zero + size_fade), dtype=np.float64)
+        fade_out[-(size_zero + size_fade):-size_fade] = (np.flip(np.arange(size_fade, dtype=np.float64))/(size_fade-1))**2
+        d_rho_s[-(size_zero + size_fade):] *= fade_out
+        d_rho_d[-(size_zero + size_fade):] *= fade_out
