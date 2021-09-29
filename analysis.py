@@ -7,7 +7,8 @@ class Analysis:
         self.dr = dr
         self.n = n
         self.__init_weights()
-
+        self.__init_weights_shell()
+    
     def __init_weights(self):
         dr, n, weights = self._init_integral()
         self._init_divergence(dr, n, weights)
@@ -48,8 +49,16 @@ class Analysis:
         div_op *= -4*np.pi*dr**2/(weights.reshape(-1, 1))
         self._div_op = sparse.csr_matrix(div_op)
 
+    def __init_weights_shell(self):
+        self.weights_shell = np.ones(self.n)
+        self.weights_shell[0] = 0
+        self.weights_shell *= self.dr
+
     def integrate(self, f: np.array):
         return np.sum(f * self.weights)
+
+    def integrate_shell(self, f: np.array):
+        return np.sum(f * self.weights_shell)
 
     def gradient(self, f: np.array):
         return self._grad_op.dot(f)

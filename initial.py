@@ -20,4 +20,4 @@ def load_initial(filename) -> (float, int, np.array, np.array):
         rho_self /= ana.integrate(rho_self)
         rho_self -= 1e-13
         rho_dist *= bulk_density
-        return dr, num_bins, rho_self, rho_dist
+        return dr, num_bins, bulk_density, rho_self, rho_dist

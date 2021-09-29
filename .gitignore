@@ -1,3 +1,7 @@
 out
 __pycache__
 vanhove.h5
+.cache/
+.vscode/
+dphi.dat
+wd.dat
