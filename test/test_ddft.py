@@ -4,6 +4,7 @@ from analysis import Analysis
 from ddft import DDFT
 from diffusion import Diffusion
 from fexc.fexc import Fexc
+from pytest import approx
 
 
 def test_free_diffusion():
@@ -24,7 +25,7 @@ def test_free_diffusion():
     for _ in range(100):
         rho, _, _, _ = ddft.step()
         f = diffusion.step(f)
-        assert np.all(rho == f)
+        assert rho == approx(f)
 
 
 def test_j_exc():

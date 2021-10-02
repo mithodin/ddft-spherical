@@ -33,9 +33,9 @@ def test_rosenfeld_analytic():
     rho_eval = sympy.lambdify([rp], rho)
 
     n11, n2, n2v, n3, psi11, psi2v = calculate_analytic(R, r, rp, rho)
-    n1 = lambda r: n2(r)/(4*np.pi*np.float128(R))
-    n0 = lambda r: n2(r)/(4*np.pi*np.float128(R**2))
-    n1v = lambda r: n2v(r)/(4*np.pi*np.float128(R))
+    n1 = lambda r: n2(r)/(4*np.pi*np.longfloat(R))
+    n0 = lambda r: n2(r)/(4*np.pi*np.longfloat(R**2))
+    n1v = lambda r: n2v(r)/(4*np.pi*np.longfloat(R))
 
     dr = 2 ** -6
     n = 256
