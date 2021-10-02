@@ -50,8 +50,7 @@ class Analysis:
         self._div_op = sparse.csr_matrix(div_op)
 
     def __init_weights_shell(self):
-        self.weights_shell = np.ones(self.n)
-        self.weights_shell[0] = 0
+        self.weights_shell = np.ones(self.n - 1)
         self.weights_shell *= self.dr
 
     def integrate(self, f: np.array):

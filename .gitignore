@@ -5,3 +5,7 @@ vanhove.h5
 .vscode/
 dphi.dat
 wd.dat
+bin/
+lib/
+pyvenv.cfg
+test/*.dat

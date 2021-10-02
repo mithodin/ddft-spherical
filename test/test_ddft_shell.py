@@ -18,7 +18,7 @@ def test_constant_density():
     f_exc = Fexc(ana)
     ddft = DDFTShell(ana, dt, f_exc, (rho_s_0, rho_d_0), rho_bulk)
 
-    rho_s_1, rho_d_1, j_s_1, j_d_1 = ddft.step()
+    rho_s_1, rho_d_1, j_s_1, j_d_1, _, _ = ddft.step()
 
     j_s_expected = np.zeros(n)
     j_d_expected = np.zeros(n)
@@ -47,7 +47,7 @@ def test_delta_density():
     f_exc = Fexc(ana)
     ddft = DDFTShell(ana, dt, f_exc, (rho_s_0, rho_d_0), rho_bulk)
 
-    rho_s_1, rho_d_1, j_s_1, j_d_1 = ddft.step()
+    rho_s_1, rho_d_1, j_s_1, j_d_1, _, _ = ddft.step()
 
     j_s_expected = np.asarray([0, 0.25, 0.25, 0, 0, 0, 0, 0])
     j_d_expected = np.asarray([-0.0515749, -0.3015749, -0.25 , 0, 0, 0, 0, 0])
@@ -71,13 +71,15 @@ def test_constant_current():
     f_exc = Fexc(ana)
     ddft = DDFTShell(ana, dt, f_exc, (rho_s_0, rho_d_0), rho_bulk)
 
-    f_ext = 1 / (np.arange(n) * np.arange(n))
+    f_ext = np.arange(n) * np.arange(n)
+    f_ext[0] = 1
+    f_ext = 1 / f_ext
     f_ext = np.stack((f_ext, f_ext))
 
-    rho_s_1, rho_d_1, j_s_1, j_d_1 = ddft.step(f_ext=f_ext)
+    rho_s_1, rho_d_1, j_s_1, j_d_1, _, _ = ddft.step(f_ext=f_ext)
 
     j_s_expected = np.zeros(n)
-    j_d_expected = np.asarray([np.inf, 1., 0.25, 0.1111111, 0.0625 , 0.04 , 0.0277778, 0.0204082])
+    j_d_expected = np.asarray([1., 1., 0.25, 0.1111111, 0.0625 , 0.04 , 0.0277778, 0.0204082])
     rho_s_expected = np.asarray([0, 0, 0, 0, 0, 0, 0, 0])
     rho_d_expected = np.asarray([0.8689404, 0.9, 1, 1, 1, 1, 1, 1])
 

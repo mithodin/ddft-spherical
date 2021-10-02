@@ -25,7 +25,7 @@ def test_free_diffusion():
     for _ in range(100):
         rho, _, _, _ = ddft.step()
         f = diffusion.step(f)
-        assert rho == approx(f)
+        np.testing.assert_almost_equal(rho, f)
 
 
 def test_j_exc():
@@ -41,5 +41,5 @@ def test_j_exc():
 
     ddft = DDFT(ana, dt, f_exc, (gauss, np.zeros(n)))
     j_s, j_d = ddft.j_exc()
-    assert np.all(j_s == np.zeros(n))
-    assert np.all(j_d == np.zeros(n))
+    np.testing.assert_almost_equal(j_s, np.zeros(n))
+    np.testing.assert_almost_equal(j_d, np.zeros(n))

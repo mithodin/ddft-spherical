@@ -5,15 +5,16 @@ from ddft_shell import DDFTShell
 from cutoff import Cutoff
 from fexc.calculate_weights import WeightCalculator
 from fexc.rosenfeld import Rosenfeld
+from fexc.fexc import Fexc
 from fexc.weighted_density import WeightedDensity
 from initial import load_initial
 from tqdm import tqdm
 
 timesteps = {
     'initial': {
-        'small_steps': 10**1,
-        'big_steps': 10**4,
-        'simulation_time': 10*10**-4
+        'small_steps': 10**5,
+        'big_steps': 10**0,
+        'simulation_time': 10**(1)
     },
     # 'main': {
     #     'small_steps': 10**3,
@@ -32,6 +33,7 @@ if __name__ == "__main__":
     wc = WeightCalculator()
     wd = WeightedDensity(analysis, wc)
     f_exc = Rosenfeld(analysis, wd)
+    #f_exc = Fexc(analysis)
     cutoff = lambda a: Cutoff(1e-70).cutoff(a)
 
     rho_self = cutoff(rho_self)
@@ -42,7 +44,9 @@ if __name__ == "__main__":
 
     j_s = np.zeros(num_bins)
     j_d = np.zeros(num_bins)
-
+    D_rho_shell_self = np.zeros(num_bins)
+    D_rho_shell_dist = np.zeros(num_bins)
+    
     t0 = 0
     for phase in timesteps.keys():
         log(" > {} phase".format(phase))
@@ -54,10 +58,10 @@ if __name__ == "__main__":
             # norm_self = analysis.integrate(rho_self)
             # norm_dist = analysis.integrate(rho_dist)
             norm_self, norm_dist = ddft.norms()
-            np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1), j_s.reshape(-1, 1), j_d.reshape(-1, 1))),
+            np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1), j_s.reshape(-1, 1), j_d.reshape(-1, 1), D_rho_shell_self.reshape(-1, 1), D_rho_shell_dist.reshape(-1, 1))),
                        header='# t = {}\n# norm = {:.30f}\t{:.30f}'.format(t / big_steps + t0, norm_self, norm_dist), footer='\n', comments='')
             for tt in tqdm(range(small_steps), position=1, desc='small steps', file=sys.stderr):
-                rho_self, rho_dist, j_s, j_d = ddft.step()
+                rho_self, rho_dist, j_s, j_d, D_rho_shell_self, D_rho_shell_dist = ddft.step()
             if not (np.all(np.isfinite(rho_self)) and np.all(np.isfinite(rho_dist))):
                 log("ERROR: invalid number detected in rho")
                 sys.exit(1)
@@ -66,6 +70,6 @@ if __name__ == "__main__":
     # norm_self = analysis.integrate(rho_self)
     # norm_dist = analysis.integrate(rho_dist)
     norm_self, norm_dist = ddft.norms()
-    np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1), j_s.reshape(-1, 1), j_d.reshape(-1, 1))),
+    np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1), j_s.reshape(-1, 1), j_d.reshape(-1, 1), D_rho_shell_self.reshape(-1, 1), D_rho_shell_dist.reshape(-1, 1))),
                header='# t = {}\n# norm = {:.30f}\t{:.30f}'.format(t0, norm_self, norm_dist), footer='\n', comments='')
     log("*** done, have a nice day ***")
