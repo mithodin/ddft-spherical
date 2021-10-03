@@ -13,7 +13,7 @@ fi
 dr=0.0078125
 n=4096
 
-infilediffusion=out/diffusion-test.dat
+infilediffusion=out/diffusion.dat
 
 normfile="$outfolder"/norm.dat
 echo Norm: $normfile
