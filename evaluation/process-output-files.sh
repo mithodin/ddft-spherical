@@ -46,7 +46,7 @@ do
 
     echo Diffusion: $i $outfile
 
-    echo "2_rho_self 3_rho_dist 4_j_self 5_j_dist 6_D_rho_shell_self 7_D_rho_shell_dist" > tmp
+    echo "2_rho_self 3_rho_dist 4_j_self 5_j_dist" > tmp
 
     head -n $lastline $infilediffusion|tail -n $n >> tmp
 

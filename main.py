@@ -44,8 +44,6 @@ if __name__ == "__main__":
 
     j_s = np.zeros(num_bins)
     j_d = np.zeros(num_bins)
-    D_rho_shell_self = np.zeros(num_bins)
-    D_rho_shell_dist = np.zeros(num_bins)
     
     t0 = 0
     for phase in timesteps.keys():
@@ -58,10 +56,10 @@ if __name__ == "__main__":
             # norm_self = analysis.integrate(rho_self)
             # norm_dist = analysis.integrate(rho_dist)
             norm_self, norm_dist = ddft.norms()
-            np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1), j_s.reshape(-1, 1), j_d.reshape(-1, 1), D_rho_shell_self.reshape(-1, 1), D_rho_shell_dist.reshape(-1, 1))),
+            np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1), j_s.reshape(-1, 1), j_d.reshape(-1, 1))),
                        header='# t = {}\n# norm = {:.30f}\t{:.30f}'.format(t / big_steps + t0, norm_self, norm_dist), footer='\n', comments='')
             for tt in tqdm(range(small_steps), position=1, desc='small steps', file=sys.stderr):
-                rho_self, rho_dist, j_s, j_d, D_rho_shell_self, D_rho_shell_dist = ddft.step()
+                rho_self, rho_dist, j_s, j_d = ddft.step()
             if not (np.all(np.isfinite(rho_self)) and np.all(np.isfinite(rho_dist))):
                 log("ERROR: invalid number detected in rho")
                 sys.exit(1)
@@ -70,6 +68,6 @@ if __name__ == "__main__":
     # norm_self = analysis.integrate(rho_self)
     # norm_dist = analysis.integrate(rho_dist)
     norm_self, norm_dist = ddft.norms()
-    np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1), j_s.reshape(-1, 1), j_d.reshape(-1, 1), D_rho_shell_self.reshape(-1, 1), D_rho_shell_dist.reshape(-1, 1))),
+    np.savetxt(sys.stdout.buffer, np.hstack((rho_self.reshape(-1, 1), rho_dist.reshape(-1, 1), j_s.reshape(-1, 1), j_d.reshape(-1, 1))),
                header='# t = {}\n# norm = {:.30f}\t{:.30f}'.format(t0, norm_self, norm_dist), footer='\n', comments='')
     log("*** done, have a nice day ***")

@@ -14,26 +14,19 @@ class DDFTShell(DDFT):
         self._D = 1.
         self._rho_bulk_s = 0.
         self._rho_bulk_d = rho_bulk
-        self._delta_rho_bulk_s = 0.
-        self._delta_rho_bulk_d = 0.
 
-        self._delta_rho_shell_bulk_s = self._delta_rho_bulk_s * 4. * np.pi * self._dr**2 * self.n**2
-        self._delta_rho_shell_bulk_d = self._delta_rho_bulk_d * 4. * np.pi * self._dr**2 * self.n**2
-        
-        self._radius_extended = np.arange(self.n + 1)
-        self._radius_extended[0] = -1
-        self._radius_extended = self._radius_extended * self._dr
+        self._radius = np.arange(self.n+1)
 
-        self._normalized_shell_surfaces = 4. * np.pi * self._dr**2 * np.power(range(1, self.n), 2)
+        self._normalized_shell_surfaces = 4. * np.pi * self._radius * self._radius
 
-        self._delta_rho_shell_s = self.to_delta_shell_density_s(self._cutoff(rho0[0]).copy())
-        self._delta_rho_shell_d = self.to_delta_shell_density_d(self._cutoff(rho0[1]).copy())
+        self._delta_rho_shell_s = self.to_shell_density(self._cutoff(rho0[0]).copy(), self._rho_bulk_s)
+        self._delta_rho_shell_d = self.to_shell_density(self._cutoff(rho0[1]).copy(), self._rho_bulk_d)
 
     def step(self, f_ext: (np.array, np.array) = None) -> (np.array, np.array, np.array, np.array):
 
         #initialize present quantities
-        rho_s = self.to_volume_density_delta_s(self._delta_rho_shell_s)
-        rho_d = self.to_volume_density_delta_d(self._delta_rho_shell_d)
+        rho_s = self.to_volume_density(self._delta_rho_shell_s, self._rho_bulk_s)
+        rho_d = self.to_volume_density(self._delta_rho_shell_d, self._rho_bulk_d)
 
         j_exc = self.j_exc()
         #np.savetxt('tmp_jexc_'+str(self.n)+'_'+ "%.6f" %self._dt,np.transpose([j_exc[0], j_exc[1]]))
@@ -49,6 +42,9 @@ class DDFTShell(DDFT):
 
         j_shell_s = self.to_shell_density(j_s)
         j_shell_d = self.to_shell_density(j_d)
+
+        j_shell_s[0] = -j_shell_s[1]
+        j_shell_d[0] = -j_shell_d[1]
         
         #add ideal current just for output
         rho_minus_s = np.concatenate(([rho_s[0]], rho_s[:-1]))
@@ -60,70 +56,43 @@ class DDFTShell(DDFT):
         j_d += - self._D * (rho_plus_d - rho_minus_d) / (2 * self._dr)
         
         #temporal integration of density
-        delta_rho_shell_extended_s = np.concatenate(([0],self._delta_rho_shell_s,[self._delta_rho_shell_bulk_s]))
-        delta_rho_shell_extended_d = np.concatenate(([0],self._delta_rho_shell_d,[self._delta_rho_shell_bulk_d]))
+        DRs = self._delta_rho_shell_s
+        DRd = self._delta_rho_shell_d
 
-        delta_rho_shell_over_radius_extended_s = np.divide(delta_rho_shell_extended_s, self._radius_extended)
-        delta_rho_shell_over_radius_extended_d = np.divide(delta_rho_shell_extended_d, self._radius_extended)
+        delta_rho_shell_over_radius_s = np.divide(DRs, np.where(self._radius == 0, 1, self._radius))
+        delta_rho_shell_over_radius_d = np.divide(DRd, np.where(self._radius == 0, 1, self._radius))
 
-        j_shell_extended_s = np.concatenate(([-j_shell_s[0]], j_shell_s, [j_shell_s[-1]]))
-        j_shell_extended_d = np.concatenate(([-j_shell_d[0]], j_shell_d, [j_shell_d[-1]]))
-
-        D_delta_rho_shell_s = (delta_rho_shell_extended_s[2:] - 2 * delta_rho_shell_extended_s[1:-1] + delta_rho_shell_extended_s[:-2]) / self._dr
-        D_delta_rho_shell_d = (delta_rho_shell_extended_d[2:] - 2 * delta_rho_shell_extended_d[1:-1] + delta_rho_shell_extended_d[:-2]) / self._dr
+        D_delta_rho_shell_s = (DRs[2:] - 2 * DRs[1:-1] + DRs[:-2]) / self._dr
+        D_delta_rho_shell_d = (DRd[2:] - 2 * DRd[1:-1] + DRd[:-2]) / self._dr
         
-        D_delta_rho_shell_s += - delta_rho_shell_over_radius_extended_s[2:] + delta_rho_shell_over_radius_extended_s[:-2]
-        D_delta_rho_shell_d += - delta_rho_shell_over_radius_extended_d[2:] + delta_rho_shell_over_radius_extended_d[:-2]
+        D_delta_rho_shell_s += - delta_rho_shell_over_radius_s[2:] + delta_rho_shell_over_radius_s[:-2]
+        D_delta_rho_shell_d += - delta_rho_shell_over_radius_d[2:] + delta_rho_shell_over_radius_d[:-2]
         
-        D_delta_rho_shell_s += - (j_shell_extended_s[2:] - j_shell_extended_s[:-2]) / (2 * self._D)
-        D_delta_rho_shell_d += - (j_shell_extended_d[2:] - j_shell_extended_d[:-2]) / (2 * self._D)
+        D_delta_rho_shell_s += - (j_shell_s[2:] - j_shell_s[:-2]) / (2 * self._D)
+        D_delta_rho_shell_d += - (j_shell_d[2:] - j_shell_d[:-2]) / (2 * self._D)
         
         D_delta_rho_shell_s *= self._D * self._dt / self._dr
         D_delta_rho_shell_d *= self._D * self._dt / self._dr
         
-        self._delta_rho_shell_s += D_delta_rho_shell_s
-        self._delta_rho_shell_d += D_delta_rho_shell_d
+        self._delta_rho_shell_s[1:-1] += D_delta_rho_shell_s
+        self._delta_rho_shell_d[1:-1] += D_delta_rho_shell_d
 
-        rho_s = self.to_volume_density_delta_s(self._delta_rho_shell_s)
-        rho_d = self.to_volume_density_delta_d(self._delta_rho_shell_d)
+        rho_s = self.to_volume_density(self._delta_rho_shell_s, self._rho_bulk_s)
+        rho_d = self.to_volume_density(self._delta_rho_shell_d, self._rho_bulk_d)
 
-        return rho_s, rho_d, j_s, j_d, np.concatenate(([0], D_delta_rho_shell_s)), np.concatenate(([0], D_delta_rho_shell_d))
+        return rho_s, rho_d, j_s, j_d
 
-    def to_shell_density(self, volume_density):
-        return volume_density[1:] * self._normalized_shell_surfaces
+    def to_shell_density(self, volume_density, bulk = 0):
+        return np.concatenate(((volume_density - bulk) * self._normalized_shell_surfaces[:-1], [0]))
 
-    def to_delta_shell_density_s(self, volume_density):
-        return (volume_density[1:] - self._rho_bulk_s) * self._normalized_shell_surfaces
+    def to_volume_density(self,shell_density, bulk = 0):
+        result = (shell_density / self._normalized_shell_surfaces + bulk)[:-1]
 
-    def to_delta_shell_density_d(self, volume_density):
-        return (volume_density[1:] - self._rho_bulk_d) * self._normalized_shell_surfaces
+        result[0] = self.extrapolate_to_zero_logarithmically(result[1], result[2])
+        if not np.isfinite(result[0]):
+            result[0] = result[1]
 
-    def to_volume_density(self,shell_density):
-        result = shell_density / self._normalized_shell_surfaces
-
-        result0 = self.extrapolate_to_zero_logarithmically(result[0], result[1])
-        if not np.isfinite(result0):
-            result0 = result[0]
-
-        return np.concatenate(([result0],result))
-
-    def to_volume_density_delta_s(self,shell_density):
-        result = shell_density / self._normalized_shell_surfaces + self._rho_bulk_s
-
-        result0 = self.extrapolate_to_zero_logarithmically(result[0], result[1])
-        if not np.isfinite(result0):
-            result0 = result[0]
-
-        return np.concatenate(([result0],result))
-
-    def to_volume_density_delta_d(self,shell_density):
-        result = shell_density / self._normalized_shell_surfaces + self._rho_bulk_d
-
-        result0 = self.extrapolate_to_zero_logarithmically(result[0], result[1])
-        if not np.isfinite(result0):
-            result0 = result[0]
-
-        return np.concatenate(([result0],result))
+        return result
 
     def norms(self):
         return self._ana.integrate_shell(self._delta_rho_shell_s), self._ana.integrate_shell(self._delta_rho_shell_d)

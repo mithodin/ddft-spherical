@@ -69,7 +69,7 @@ def input_data_ideal():
     f_ext = 1 / f_ext
     f_ext = np.stack((f_ext, f_ext))
 
-    # expectation: density is stationary (except innermost bin)
+    # expectation: density is stationary (except innermost and outermost bin)
     yield [
         n,
         rho_bulk,
@@ -79,7 +79,7 @@ def input_data_ideal():
         np.zeros(n),
         np.asarray([1, 1, 1/4, 1/9, 1/16, 1/25, 1/36, 1/49]),
         np.asarray([0, 0, 0, 0, 0, 0, 0, 0]),
-        np.asarray([np.exp((4 * np.log(0.9) - np.log(1)) / 3), 0.9, 1, 1, 1, 1, 1, 1])
+        np.asarray([np.exp((4 * np.log(0.9) - np.log(1)) / 3), 0.9, 1, 1, 1, 1, 1, 1+1/980])
     ]
 
     # case: alternating density
@@ -154,7 +154,7 @@ def test_ideal_gas(input):
     f_exc = Fexc(ana)
     ddft = DDFTShell(ana, dt, f_exc, (rho_s_0, rho_d_0), rho_bulk)
 
-    rho_s_1, rho_d_1, j_s_1, j_d_1, _, _ = ddft.step(f_ext=f_ext)
+    rho_s_1, rho_d_1, j_s_1, j_d_1 = ddft.step(f_ext=f_ext)
 
     np.testing.assert_almost_equal(j_s_expected, j_s_1, decimal=precision_ideal)
     np.testing.assert_almost_equal(j_d_expected, j_d_1, decimal=precision_ideal)
@@ -196,7 +196,7 @@ def test_hard_spheres(input):
     f_exc = Rosenfeld(ana, wd)
     ddft = DDFTShell(ana, dt, f_exc, (rho_s_0, rho_d_0), rho_bulk)
 
-    rho_s_1, rho_d_1, j_s_1, j_d_1, _, _ = ddft.step(f_ext=f_ext)
+    rho_s_1, rho_d_1, j_s_1, j_d_1 = ddft.step(f_ext=f_ext)
 
     np.testing.assert_almost_equal(j_s_expected[1:], j_s_1[1:], decimal=precision_hard_spheres)
     np.testing.assert_almost_equal(j_d_expected[1:], j_d_1[1:], decimal=precision_hard_spheres)
