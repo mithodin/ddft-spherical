@@ -13,14 +13,14 @@ from tqdm import tqdm
 timesteps = {
     'initial': {
         'small_steps': 10**5,
-        'big_steps': 10**0,
-        'simulation_time': 10**(1)
+        'big_steps': 10**2,
+        'simulation_time': 10**-2
     },
-    # 'main': {
-    #     'small_steps': 10**3,
-    #     'big_steps': 10**3,
-    #     'simulation_time': 0.1 - 10**-3
-    # }
+    'main': {
+        'small_steps': 10**4,
+        'big_steps': 10**2,
+        'simulation_time': 1.0 - 10**-2
+    }
 }
 
 log = lambda *args: print(*args, file=sys.stderr)
