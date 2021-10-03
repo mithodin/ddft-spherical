@@ -36,6 +36,7 @@ class DDFTShell(DDFT):
         rho_d = self.to_volume_density_delta_d(self._delta_rho_shell_d)
 
         j_exc = self.j_exc()
+        #np.savetxt('tmp_jexc_'+str(self.n)+'_'+ "%.6f" %self._dt,np.transpose([j_exc[0], j_exc[1]]))
 
         #non-ideal current
         j_s = j_exc[0]
@@ -45,6 +46,7 @@ class DDFTShell(DDFT):
             j_s += rho_s * f_ext[0]
             j_d += rho_d * f_ext[1]
         
+
         j_shell_s = self.to_shell_density(j_s)
         j_shell_d = self.to_shell_density(j_d)
         
