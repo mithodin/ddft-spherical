@@ -12,9 +12,11 @@ class DDFT:
         self._cutoff = (lambda arr: cutoff.cutoff(arr)) if cutoff is not None else (lambda arr: arr)
         self._rho_s = self._cutoff(rho0[0]).copy()
         self._rho_d = self._cutoff(rho0[1]).copy()
+        
 
     def step(self, f_ext: (np.array, np.array) = None) -> (np.array, np.array, np.array, np.array):
         j_exc = self.j_exc()
+        np.savetxt('tmp_jexc',np.transpose([j_exc[0],j_exc[1]]))
         j_s = - self._ana.gradient(self._rho_s) + j_exc[0]
         j_d = - self._ana.gradient(self._rho_d) + j_exc[1]
         if f_ext is not None:
