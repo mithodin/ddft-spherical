@@ -5,7 +5,7 @@ from pytest import approx
 from analysis import Analysis
 from fexc.calculate_weights import WeightCalculator
 from fexc.weighted_density import WeightedDensity, WD
-from test_weightend_density_analytic import calculate_analytic
+from test_weighted_density_analytic import calculate_analytic
 
 
 def test_weighted_densities_simple():

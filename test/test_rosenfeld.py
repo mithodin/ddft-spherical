@@ -6,7 +6,7 @@ from analysis import Analysis
 from fexc.calculate_weights import WeightCalculator
 from fexc.rosenfeld import Rosenfeld
 from fexc.weighted_density import WeightedDensity
-from test_weightend_density_analytic import calculate_analytic
+from test_weighted_density_analytic import calculate_analytic
 
 
 def test_rf_expression():
