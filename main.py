@@ -11,15 +11,30 @@ from initial import load_initial
 from tqdm import tqdm
 
 timesteps = {
-    'initial': {
+    '1': {
+        'small_steps': 10**1,
+        'big_steps': 10**4,
+        'simulation_time': 10**(-3)
+    },
+    '2': {
+        'small_steps': 10**2,
+        'big_steps': 10**3,
+        'simulation_time': 10**(-2)-10**(-3)
+    },
+    '3': {
+        'small_steps': 10**3,
+        'big_steps': 10**2,
+        'simulation_time': 10**(-1)-10**(-2)
+    },
+    '4': {
         'small_steps': 10**4,
         'big_steps': 10**1,
-        'simulation_time': 10**-0
+        'simulation_time': 10**(-0)-10**(-1)
     },
-    # 'main': {
-    #     'small_steps': 10**4,
-    #     'big_steps': 10**2,
-    #     'simulation_time': 1.0 - 10**-2
+    # '5': {
+    #     'small_steps': 10**5,
+    #     'big_steps': 10**0,
+    #     'simulation_time': 10**(1)-10**(-0)
     # }
 }
 
