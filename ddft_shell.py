@@ -84,10 +84,10 @@ class DDFTShell(DDFT):
         self._delta_rho_shell_s += D_delta_rho_shell_s
         self._delta_rho_shell_d += D_delta_rho_shell_d
 
-        rho_s = self.to_volume_density_delta_s(self._delta_rho_shell_s)
-        rho_d = self.to_volume_density_delta_d(self._delta_rho_shell_d)
+        self._rho_s = self.to_volume_density_delta_s(self._delta_rho_shell_s)
+        self._rho_d = self.to_volume_density_delta_d(self._delta_rho_shell_d)
 
-        return rho_s, rho_d, j_s, j_d, np.concatenate(([0], D_delta_rho_shell_s)), np.concatenate(([0], D_delta_rho_shell_d))
+        return self._rho_s, self._rho_d, j_s, j_d, np.concatenate(([0], D_delta_rho_shell_s)), np.concatenate(([0], D_delta_rho_shell_d))
 
     def to_shell_density(self, volume_density):
         return volume_density[1:] * self._normalized_shell_surfaces
