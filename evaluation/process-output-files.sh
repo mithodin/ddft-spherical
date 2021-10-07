@@ -11,7 +11,7 @@ if [[ ! -d "$outfolder" ]];then
 fi
 
 dr=0.0078125
-n=2048
+n=4096
 
 infilediffusion=out/diffusion.dat
 
