@@ -4,8 +4,8 @@ from analysis import Analysis
 from ddft_shell import DDFTShell
 from cutoff import Cutoff
 from fexc.calculate_weights import WeightCalculator
-from fexc.rosenfeld_q3 import RosenfeldQ3
 from fexc.weighted_density import WeightedDensity
+from fexc.white_bear_ii_tensorial import WhiteBearIITensorial
 from initial import load_initial
 from tqdm import tqdm
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     analysis = Analysis(dr, num_bins)
     wc = WeightCalculator()
     wd = WeightedDensity(analysis, wc)
-    f_exc = RosenfeldQ3(analysis, wd)
+    f_exc = WhiteBearIITensorial(analysis, wd)
     cutoff = lambda a: Cutoff(1e-70).cutoff(a)
 
     rho_self = cutoff(rho_self)
