@@ -4,7 +4,7 @@ from pytest import approx
 
 from analysis import Analysis
 from fexc.calculate_weights import WeightCalculator
-from fexc.rosenfeld import Rosenfeld
+from fexc.rosenfeld_q3 import RosenfeldQ3
 from fexc.weighted_density import WeightedDensity
 from test_weighted_density_analytic import calculate_analytic
 
@@ -13,7 +13,7 @@ def test_rf_expression():
     dr = 2**-3
     n = 32
     ana = Analysis(dr, n)
-    rf = Rosenfeld(ana, None)
+    rf = RosenfeldQ3(ana, None)
 
     n2 = np.array([0.5, 0.1, 0.2])
     n3 = np.array([0.1, 0.3, 0.8])
@@ -45,7 +45,7 @@ def test_rosenfeld_analytic():
     ana = Analysis(dr, n)
     wc = WeightCalculator()
     wd = WeightedDensity(ana, wc)
-    rf = Rosenfeld(ana, wd)
+    rf = RosenfeldQ3(ana, wd)
 
     phi_numeric = rf._phi(n2(r), n3(r), n2v(r))
     rosenfeld_numeric = rf.fexc((rho_discrete, np.zeros(n)))
@@ -63,7 +63,7 @@ def test_fexc():
     ana = Analysis(dr, n)
     wc = WeightCalculator()
     wd = WeightedDensity(ana, wc)
-    rf = Rosenfeld(ana, wd)
+    rf = RosenfeldQ3(ana, wd)
 
     rho0 = 0.1
     rho = np.ones(n)*rho0
@@ -89,7 +89,7 @@ def test_grad():
     wc = WeightCalculator()
     # expect a runtime of about 30 sec with n = 128
     wd = WeightedDensity(ana, wc)
-    rf = Rosenfeld(ana, wd)
+    rf = RosenfeldQ3(ana, wd)
 
     sigma0 = 2.0
     gauss = np.exp(-(np.arange(n)*dr/sigma0)**2/2)/sigma0/np.sqrt(2*np.pi)
@@ -107,5 +107,4 @@ def test_grad():
         rho_minus[i] -= delta/ana.weights[i]
         numeric_gradient[i] = (rf.fexc((rho_plus, zero)) - rf.fexc((rho_minus, zero)))/(2*delta)
 
-    np.savetxt('test.dat', np.hstack((analytic_gradient.reshape(-1, 1), numeric_gradient.reshape(-1, 1))))
     assert analytic_gradient[16:-64] == approx(numeric_gradient[16:-64], rel=10**-2)  # near the origin, things are complicated, and near the edge, we extrapolate, so the weights are off in the numerical gradient

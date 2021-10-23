@@ -5,9 +5,15 @@ import numpy as np
 import sympy as sy
 
 
-class Rosenfeld(Fexc):
+class RosenfeldQ3(Fexc):
+    """
+    Implementation of the classic Rosenfeld functional with q3 correction,
+    see e.g. Roth, R. „Fundamental measure theory for hard-sphere mixtures: a review“
+    J. Phys. Cond. Mat. 22, 0631002 (2010) for an introduction and review
+    """
+
     def __init__(self, analysis: Analysis, wd: WeightedDensity):
-        super(Rosenfeld, self).__init__(analysis)
+        super(RosenfeldQ3, self).__init__(analysis)
         self._wd = wd
         self._calc_functional_expressions()
 
@@ -39,10 +45,8 @@ class Rosenfeld(Fexc):
         except TypeError:
             rho_tot = rho[0] + rho[1]
             n2, n3, n2v = self._wd.calc_densities([WD.N2, WD.N3, WD.N2V], rho_tot)
-        np.savetxt('./wd.dat', np.hstack((n2.reshape(-1, 1), n3.reshape(-1, 1), n2v.reshape(-1, 1))))
 
         dphi = {wd: self._dphi[wd](n2, n3, n2v) for wd in [WD.PSI2, WD.PSI3, WD.PSI2V]}
-        np.savetxt('./dphi.dat', np.hstack((dphi[WD.PSI2].reshape(-1, 1), dphi[WD.PSI3].reshape(-1, 1), dphi[WD.PSI2V].reshape(-1, 1))))
 
         psi2, psi3, psi2v = (self._wd.calc_density(wd, dphi[wd]) for wd in [WD.PSI2, WD.PSI3, WD.PSI2V])
         s = psi2 + psi3 + psi2v
