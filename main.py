@@ -4,6 +4,7 @@ from analysis import Analysis
 from ddft_shell import DDFTShell
 from cutoff import Cutoff
 from fexc.calculate_weights import WeightCalculator
+from fexc.quenched import Quenched
 from fexc.weighted_density import WeightedDensity
 from fexc.white_bear_ii_tensorial import WhiteBearIITensorial
 from initial import load_initial
@@ -11,8 +12,8 @@ from tqdm import tqdm
 
 timesteps = {
     'main': {
-        'small_steps': 10**3,
-        'big_steps': 10**3,
+        'small_steps': 10**4,
+        'big_steps': 10**2,
         'simulation_time': 1.0
     }
 }
@@ -26,7 +27,8 @@ if __name__ == "__main__":
     analysis = Analysis(dr, num_bins)
     wc = WeightCalculator()
     wd = WeightedDensity(analysis, wc)
-    f_exc = WhiteBearIITensorial(analysis, wd)
+    f_base = WhiteBearIITensorial(analysis, wd)
+    f_exc = Quenched(analysis, f_base)
     cutoff = lambda a: Cutoff(1e-70).cutoff(a)
 
     rho_self = cutoff(rho_self)
