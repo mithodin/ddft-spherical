@@ -9,8 +9,6 @@ RUN apk add --no-cache \
         libressl-dev \
         musl-dev \
         libffi-dev \
-        hdf5-dev \
-        hdf5 \
         py3-pybind11 \
         py3-pybind11-dev \
         openblas \
@@ -21,7 +19,6 @@ RUN apk del \
         libressl-dev \
         musl-dev \
         libffi-dev \
-        hdf5-dev \
         py3-pybind11-dev \
         openblas-dev \
         alpine-sdk
