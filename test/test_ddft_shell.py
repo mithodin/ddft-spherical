@@ -3,10 +3,9 @@ import pytest
 
 from analysis import Analysis
 from ddft_shell import DDFTShell
-from diffusion import Diffusion
 from fexc.calculate_weights import WeightCalculator
 from fexc.fexc import Fexc
-from fexc.rosenfeld import Rosenfeld
+from fexc.rosenfeld_q3 import RosenfeldQ3
 from fexc.weighted_density import WeightedDensity
 
 precision_ideal = 15
@@ -193,7 +192,7 @@ def test_hard_spheres(input):
     ana = Analysis(dr, n)
     wc = WeightCalculator()
     wd = WeightedDensity(ana, wc)
-    f_exc = Rosenfeld(ana, wd)
+    f_exc = RosenfeldQ3(ana, wd)
     ddft = DDFTShell(ana, dt, f_exc, (rho_s_0, rho_d_0), rho_bulk)
 
     rho_s_1, rho_d_1, j_s_1, j_d_1, _, _ = ddft.step(f_ext=f_ext)
