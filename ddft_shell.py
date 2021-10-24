@@ -107,7 +107,7 @@ class DDFTShell(DDFT):
 
         return np.concatenate(([result0],result))
 
-    def to_volume_density_delta_s(self,shell_density):
+    def to_volume_density_delta_s(self, shell_density):
         result = shell_density / self._normalized_shell_surfaces + self._rho_bulk_s
 
         result0 = self.extrapolate_to_zero_logarithmically(result[0], result[1])
@@ -116,7 +116,7 @@ class DDFTShell(DDFT):
 
         return np.concatenate(([result0],result))
 
-    def to_volume_density_delta_d(self,shell_density):
+    def to_volume_density_delta_d(self, shell_density):
         result = shell_density / self._normalized_shell_surfaces + self._rho_bulk_d
 
         result0 = self.extrapolate_to_zero_logarithmically(result[0], result[1])

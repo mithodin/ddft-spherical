@@ -1,5 +1,7 @@
 import numpy as np
 
+from cutoff import Cutoff
+
 
 def load_initial(filename: str) -> (float, int, float, np.array, np.array):
     with np.load(filename) as loaded:
@@ -8,6 +10,9 @@ def load_initial(filename: str) -> (float, int, float, np.array, np.array):
         bulk_density = loaded["bulk_density"]
         rho_self = loaded["rho_self"]
         rho_dist = loaded["rho_dist"]
+    cutoff = Cutoff(1e-70)
+    rho_self = cutoff.cutoff(rho_self)
+    rho_dist = cutoff.cutoff(rho_dist)
     return dr, num_bins, bulk_density, rho_self, rho_dist
 
 
