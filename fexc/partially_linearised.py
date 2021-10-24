@@ -4,14 +4,14 @@ from analysis import Analysis
 from fexc.fexc import Fexc
 
 
-class PartiallyLinearized(Fexc):
+class PartiallyLinearised(Fexc):
     """
     This is an implementation of the partially linearised functional, where the force on the distinct density
     is calculated using the full functional, while the force on the self density is calculated in the limit
     rho_self -> 0
     """
     def __init__(self, analysis: Analysis, base: Fexc):
-        super(PartiallyLinearized, self).__init__(analysis)
+        super(PartiallyLinearised, self).__init__(analysis)
         self._base_functional = base
         self._zeros = np.zeros(analysis.n, dtype=np.float64)
 

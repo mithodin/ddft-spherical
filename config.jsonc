@@ -1,0 +1,15 @@
+{
+  "initial_state": "example_data/initial.npz",
+  "functional": {
+    "base": "white_bear_ii_tensorial",
+    "variant": "quenched"
+  },
+  "integration": [
+      {
+        "name": "main",
+        "big_steps": 100,
+        "small_steps": 10000,
+        "simulation_time": 1
+      }
+  ]
+}

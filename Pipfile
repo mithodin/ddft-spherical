@@ -8,8 +8,8 @@ numpy = "*"
 pytest = "*"
 sympy = "*"
 scipy = "*"
-h5py = "*"
 tqdm = "*"
+commentjson = "*"
 
 [dev-packages]
 
