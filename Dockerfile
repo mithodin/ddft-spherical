@@ -26,4 +26,4 @@ RUN apk del \
 
 COPY . /app
 
-CMD ["./run.sh", "$DDFT_CONFIG"]
+CMD ["./run.sh"]

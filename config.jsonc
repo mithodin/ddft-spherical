@@ -1,14 +1,26 @@
 {
+  // filename to load the initial density profiles from
   "initial_state": "example_data/initial.npz",
+  // which excess free energy functional to use
   "functional": {
+    // base functional can be either "rosenfeld_q3" or "white_bear_ii_tensorial"
     "base": "white_bear_ii_tensorial",
+    // variant can be left out, or have the value "partially_linearised" or "quenched"
     "variant": "quenched"
   },
+  // specifies integration phases. Can be any sequence of steps, if neccessary
   "integration": [
       {
+        // Human-readable specifier for this phase of the simulation
         "name": "main",
+        // How many big steps to run per 1 simulation time. After each big step, the density profiles are logged.
         "big_steps": 100,
+        // How many steps to run in each big step. The integration time Δt is 1/(big_steps * small_steps).white_bear_ii_tensorial
+        // You should keep Δt between 10^-6 and 10^-9 to avoid numerical issues. Too large will increase numerical instabilities,
+        // while too low will increase numerical noise or cause the change in the density profile to round down to 0 due to limited
+        // precision.
         "small_steps": 10000,
+        // How much time to simulate for in the intrinsic time scale of the simulation.
         "simulation_time": 1
       }
   ]
