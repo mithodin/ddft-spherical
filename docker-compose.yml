@@ -1,0 +1,10 @@
+services:
+  ddft:
+    build: .
+    volumes:
+      - ./docker/config:/app/config/
+      - ./docker/out:/app/out/
+      - ./docker/cache:/app/.cache/
+    environment:
+      - DDFT_CONFIG=/app/config/config.jsonc
+

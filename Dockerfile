@@ -13,6 +13,7 @@ RUN apk add --no-cache \
         py3-pybind11-dev \
         openblas \
         openblas-dev \
+        libstdc++ \
         alpine-sdk
 RUN pipenv install --system --deploy
 RUN apk del \
@@ -25,4 +26,4 @@ RUN apk del \
 
 COPY . /app
 
-CMD ["./run.sh"]
+CMD ["./run.sh", "$DDFT_CONFIG"]
