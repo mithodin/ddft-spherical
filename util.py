@@ -5,7 +5,7 @@ import numpy as np
 def log_state(body: list[(str, np.array)], header: dict = None) -> None:
     if header is None:
         header = dict()
-    data = np.hstack((column[1].reshape(-1, 1) for column in body))
+    data = np.hstack(tuple(column[1].reshape(-1, 1) for column in body))
     column_header = "# {}".format(" ".join([column[0] for column in body]))
     extra_header = "\n".join(["# {name} = {value:.30f}".format(name=key, value=header[key]) for key in header.keys()])
     if len(extra_header) > 0:
