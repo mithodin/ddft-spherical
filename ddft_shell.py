@@ -68,6 +68,8 @@ class DDFTShell(DDFT):
 
         self._rho_s, self._rho_d = self._shell_density_to_volume_density((self._delta_rho_shell_s,
                                                                           self._delta_rho_shell_d))
+        self._cutoff(self._rho_s)
+        self._cutoff(self._rho_d)
 
         return self._rho_s, self._rho_d, \
                j_s, j_d, \
