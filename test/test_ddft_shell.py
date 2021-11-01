@@ -9,8 +9,9 @@ from fexc.rosenfeld_q3 import RosenfeldQ3
 from fexc.weighted_density import WeightedDensity
 
 precision_ideal = 15
-#TODO change this to higher number. atm f_exc does not support this
+# TODO change this to higher number. atm f_exc does not support this
 precision_hard_spheres = 4
+
 
 def input_data_ideal():
     n = 8
@@ -105,7 +106,6 @@ def input_data_ideal():
     j_s_expected = np.asarray([0, -0.5, -0.5,  0.5,  0.5, -0.5, -0.5,  0.5])
     rho_s_expected = np.asarray([np.exp((4 * np.log(0.2) - np.log(0.95)) / 3), 2/10, 1-1/20, 1-4/30, 3/40, 6/50, 1-5/60, 1-8/70])
 
-
     # expectation: sum of densities unchanged
     j_d_expected = -j_s_expected
     rho_d_expected = rho_bulk - rho_s_expected
@@ -124,7 +124,7 @@ def input_data_ideal():
         rho_d_expected,
     ]
 
-    #different bulk density
+    # different bulk density
     rho_bulk = 0.5
     rho_s_0 = np.zeros(n)
     rho_d_0 = np.ones(n) * rho_bulk
@@ -142,9 +142,10 @@ def input_data_ideal():
         np.ones(n) * rho_bulk
     ]
 
-@pytest.mark.parametrize("input", input_data_ideal())
-def test_ideal_gas(input):
-    n, rho_bulk, rho_s_0, rho_d_0, f_ext, j_s_expected, j_d_expected, rho_s_expected, rho_d_expected = input
+
+@pytest.mark.parametrize("input_data", input_data_ideal())
+def test_ideal_gas(input_data):
+    n, rho_bulk, rho_s_0, rho_d_0, f_ext, j_s_expected, j_d_expected, rho_s_expected, rho_d_expected = input_data
 
     dr = 1
     dt = .1
@@ -182,9 +183,10 @@ def input_data_hard_spheres():
         np.ones(n) * rho_bulk
     ]
 
-@pytest.mark.parametrize("input", input_data_hard_spheres())
-def test_hard_spheres(input):
-    n, rho_bulk, rho_s_0, rho_d_0, f_ext, j_s_expected, j_d_expected, rho_s_expected, rho_d_expected = input
+
+@pytest.mark.parametrize("input_data", input_data_hard_spheres())
+def test_hard_spheres(input_data):
+    n, rho_bulk, rho_s_0, rho_d_0, f_ext, j_s_expected, j_d_expected, rho_s_expected, rho_d_expected = input_data
     
     dr = 1/128
     dt = .1
