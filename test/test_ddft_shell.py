@@ -217,8 +217,8 @@ def test_to_shell_and_back():
     f_exc = Fexc(ana)
     ddft = DDFTShell(ana, dt, f_exc, (rho_s_0, rho_d_0), rho_bulk)
 
-    to_shell_and_back_s = ddft.to_volume_density(ddft.to_shell_density(rho_s_0))
-    to_shell_and_back_d = ddft.to_volume_density(ddft.to_shell_density(rho_d_0))
+    to_shell_and_back_s = ddft._to_volume_density(ddft._to_shell_density(rho_s_0))
+    to_shell_and_back_d = ddft._to_volume_density(ddft._to_shell_density(rho_d_0))
 
     np.testing.assert_almost_equal(rho_s_0[1:], to_shell_and_back_s[1:])
     np.testing.assert_almost_equal(rho_d_0[1:], to_shell_and_back_d[1:])
