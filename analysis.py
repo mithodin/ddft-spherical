@@ -33,6 +33,13 @@ class Analysis:
         grad_op /= dr
         self._grad_op = sparse.csr_matrix(grad_op)
 
+        fwd_grad_op = np.zeros((n, n), dtype=np.float64)
+        fwd_grad_op[n-1, n-2:n] = [-1., 1.]
+        for k in range(0, n-1):
+            fwd_grad_op[k, k:k+2] = [-1., 1.]
+        fwd_grad_op /= dr
+        self._fwd_grad_op = sparse.csr_matrix(fwd_grad_op)
+
     def _init_divergence(self, dr, n, weights):
         div_op = np.zeros((n, n), dtype=np.float64)
         k = np.arange(n, dtype=np.float64)
@@ -61,6 +68,9 @@ class Analysis:
 
     def gradient(self, f: np.array):
         return self._grad_op.dot(f)
+
+    def forward_gradient(self, f: np.array):
+        return self._fwd_grad_op.dot(f)
 
     def delta(self):
         res = np.zeros(self.n)
