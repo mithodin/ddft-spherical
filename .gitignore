@@ -3,6 +3,7 @@ __pycache__
 vanhove.h5
 .cache/
 .vscode/
+.mypy_cache
 dphi.dat
 wd.dat
 bin/

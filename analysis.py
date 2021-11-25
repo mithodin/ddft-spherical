@@ -60,16 +60,16 @@ class Analysis:
         self.weights_shell = np.ones(self.n - 1)
         self.weights_shell *= self.dr
 
-    def integrate(self, f: np.array):
+    def integrate(self, f: np.ndarray):
         return np.sum(f * self.weights)
 
-    def integrate_shell(self, f: np.array):
+    def integrate_shell(self, f: np.ndarray):
         return np.sum(f * self.weights_shell)
 
-    def gradient(self, f: np.array):
+    def gradient(self, f: np.ndarray):
         return self._grad_op.dot(f)
 
-    def forward_gradient(self, f: np.array):
+    def forward_gradient(self, f: np.ndarray):
         return self._fwd_grad_op.dot(f)
 
     def delta(self):

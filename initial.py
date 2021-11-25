@@ -1,9 +1,11 @@
+from typing import Tuple
+
 import numpy as np
 
 from cutoff import Cutoff
 
 
-def load_initial(filename: str) -> (float, int, float, np.array, np.array):
+def load_initial(filename: str) -> Tuple[float, int, float, np.ndarray, np.ndarray]:
     with np.load(filename) as loaded:
         dr = loaded["dr"]
         num_bins = loaded["num_bins"]
@@ -17,7 +19,7 @@ def load_initial(filename: str) -> (float, int, float, np.array, np.array):
 
 
 def export(
-        filename: str, dr: float, num_bins: int, bulk_density: float, rho_self: np.array, rho_dist: np.array
+        filename: str, dr: float, num_bins: int, bulk_density: float, rho_self: np.ndarray, rho_dist: np.ndarray
 ) -> None:
     """
     Save a compressed numpy file in the correct format for the loader to load
