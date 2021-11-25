@@ -6,7 +6,7 @@ from logger.logger import Logger
 
 
 class AsciiLogger(Logger):
-    def log_state(self, body: List[Tuple[str, np.ndarray]], header: Dict[str, float] = None) -> None:
+    def log_state(self: 'AsciiLogger', body: List[Tuple[str, np.ndarray]], header: Dict[str, float] = None) -> None:
         if header is None:
             header = dict()
         data = np.hstack(tuple(column[1].reshape(-1, 1) for column in body))

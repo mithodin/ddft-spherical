@@ -8,7 +8,7 @@ from fexc.weighted_density import WeightedDensity, WD
 from test_weighted_density_analytic import calculate_analytic
 
 
-def test_weighted_densities_simple():
+def test_weighted_densities_simple() -> None:
     dr = 2 ** -3
     n = 32
     ana = Analysis(dr, n)
@@ -48,7 +48,7 @@ def test_weighted_densities_simple():
     assert psi2v[:-8] == approx(rho_bulk * psi2v_ana[:-8])
 
 
-def test_weighted_densities():
+def test_weighted_densities() -> None:
     R = sympy.Rational(1, 2)
     r, rp = sympy.symbols('r rp', real=True)
 

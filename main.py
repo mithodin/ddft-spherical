@@ -28,7 +28,7 @@ from logger.ascii_logger import AsciiLogger
 from util import log, get_functional_config
 
 
-def main():
+def main() -> None:
     log("*** trying to load config ***")
     try:
         configfile = sys.argv[1]

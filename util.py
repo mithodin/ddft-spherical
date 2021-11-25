@@ -2,7 +2,7 @@ import sys
 from typing import Tuple
 
 
-def log(*args):
+def log(*args: str) -> None:
     print(*args, file=sys.stderr)
 
 

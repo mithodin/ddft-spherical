@@ -32,7 +32,7 @@ class WeightedDensity:
     _cache_dir = './.cache/'
     _version = 1
 
-    def __init__(self, analysis: Analysis, wc: WeightCalculator, size_sphere: float = 1.0):
+    def __init__(self: 'WeightedDensity', analysis: Analysis, wc: WeightCalculator, size_sphere: float = 1.0) -> None:
         self._ana = analysis
         self._size_sphere = size_sphere
         # measured in bins
@@ -42,7 +42,7 @@ class WeightedDensity:
         self.__calc_coefficients()
         self._r = np.arange(self._ana.n)*self._ana.dr
 
-    def __calc_coefficients(self):
+    def __calc_coefficients(self: 'WeightedDensity') -> None:
         signature = "{n:.0f}-{dr:.10e}-{r_sphere:.0f}-{version:.0f}".format(n=self._ana.n, dr=self._ana.dr,
                                                                             r_sphere=self._radius_sphere,
                                                                             version=self._version)
@@ -64,11 +64,11 @@ class WeightedDensity:
                 os.mkdir(self._cache_dir)
             np.savez_compressed(filename, **weights)
 
-    def __get_filename(self, signature):
+    def __get_filename(self: 'WeightedDensity', signature: str) -> str:
         hash = hashlib.sha1(signature.encode('utf-8')).hexdigest()
         return "{cache}/{hash}.npz".format(hash=hash, cache=self._cache_dir)
 
-    def __calc_n3_coeff(self):
+    def __calc_n3_coeff(self: 'WeightedDensity') -> None:
         wn3 = np.zeros((self._ana.n, self._ana.n))
         wn3[0, :] = self._wc.get_weights(4*np.pi*self._wc.r**2, self._ana.n, 0, self._radius_sphere, self._ana.dr)
         rp = self._wc.r
@@ -98,7 +98,7 @@ class WeightedDensity:
         self._coefficients[WD.N3] = sparse.csr_matrix(wn3)
         self._coefficients[WD.PSI3] = self._coefficients[WD.N3]
 
-    def __calc_n2_coeff(self):
+    def __calc_n2_coeff(self: 'WeightedDensity') -> None:
         wn2 = np.zeros((self._ana.n, self._ana.n))
         rp = self._wc.r
         R = self._size_sphere/2
@@ -119,7 +119,7 @@ class WeightedDensity:
         self._coefficients[WD.PSI1] = self._coefficients[WD.N1]
         self._coefficients[WD.PSI0] = self._coefficients[WD.N0]
 
-    def __calc_n2v_coeff(self):
+    def __calc_n2v_coeff(self: 'WeightedDensity') -> None:
         wn2v = np.zeros((self._ana.n, self._ana.n))
         wpsi2v = np.zeros((self._ana.n, self._ana.n))
         rp = self._wc.r
@@ -145,7 +145,7 @@ class WeightedDensity:
         self._coefficients[WD.PSI2V] = sparse.csr_matrix(wpsi2v)
         self._coefficients[WD.PSI1V] = sparse.csr_matrix(wpsi2v/(4*np.pi*R))
 
-    def __calc_n11_coeff(self):
+    def __calc_n11_coeff(self: 'WeightedDensity') -> None:
         wn11 = np.zeros((self._ana.n, self._ana.n))
         wpsi11 = np.zeros((self._ana.n, self._ana.n))
         rp = self._wc.r
@@ -169,11 +169,11 @@ class WeightedDensity:
         self._coefficients[WD.N11] = sparse.csr_matrix(wn11)
         self._coefficients[WD.PSI11] = sparse.csr_matrix(wpsi11)
 
-    def calc_density(self, which: WD, rho: np.ndarray) -> np.ndarray:
+    def calc_density(self: 'WeightedDensity', which: WD, rho: np.ndarray) -> np.ndarray:
         nn = self._coefficients[which].dot(rho)
         return self._ana.extrapolate(nn,
                                      (self._ana.n - 3 * self._radius_sphere, self._ana.n - self._radius_sphere),
                                      (self._ana.n - self._radius_sphere, self._ana.n))
 
-    def calc_densities(self, which: List[WD], rho: np.ndarray) -> List[np.ndarray]:
+    def calc_densities(self: 'WeightedDensity', which: List[WD], rho: np.ndarray) -> List[np.ndarray]:
         return [self.calc_density(wd, rho) for wd in which]

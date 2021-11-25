@@ -3,7 +3,7 @@ import numpy as np
 from cutoff import Cutoff
 
 
-def test_cutoff():
+def test_cutoff() -> None:
     cutoff = Cutoff(0.5)
     arr = -np.random.rand(128)
     assert np.all(cutoff.cutoff(arr) == 0.5)

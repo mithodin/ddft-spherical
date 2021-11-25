@@ -9,7 +9,7 @@ from fexc.weighted_density import WeightedDensity
 from test_weighted_density_analytic import calculate_analytic
 
 
-def test_rf_expression():
+def test_rf_expression() -> None:
     dr = 2 ** -3
     n = 32
     ana = Analysis(dr, n)
@@ -27,7 +27,7 @@ def test_rf_expression():
                     24 * np.pi * (1 - n3) ** 2))
 
 
-def test_rosenfeld_analytic():
+def test_rosenfeld_analytic() -> None:
     sphere_radius = sympy.Rational(1, 2)
     r, rp = sympy.symbols('r rp', real=True)
 
@@ -36,13 +36,13 @@ def test_rosenfeld_analytic():
 
     n11, n2, n2v, n3, psi11, psi2v = calculate_analytic(sphere_radius, r, rp, rho)
 
-    def n1(radius):
+    def n1(radius: float) -> float:
         return n2(radius) / (4 * np.pi * np.longfloat(sphere_radius))
 
-    def n0(radius):
+    def n0(radius: float) -> float:
         return n2(radius) / (4 * np.pi * np.longfloat(sphere_radius ** 2))
 
-    def n1v(radius):
+    def n1v(radius: float) -> float:
         return n2v(radius) / (4 * np.pi * np.longfloat(sphere_radius))
 
     dr = 2 ** -6
@@ -67,7 +67,7 @@ def test_rosenfeld_analytic():
     assert rosenfeld_numeric == approx(rosenfeld_analytic, rel=1e-2)
 
 
-def test_fexc():
+def test_fexc() -> None:
     dr = 2 ** -3
     n = 32
     ana = Analysis(dr, n)
@@ -93,7 +93,7 @@ def test_fexc():
     assert fexc == approx(4. / 3. * np.pi * ((n - 1) * dr) ** 3 * phi)
 
 
-def test_grad():
+def test_grad() -> None:
     dr = 2 ** -5
     n = 128
     ana = Analysis(dr, n)

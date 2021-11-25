@@ -14,12 +14,12 @@ class RosenfeldQ3(Fexc):
     J. Phys. Cond. Mat. 22, 0631002 (2010) for an introduction and review
     """
 
-    def __init__(self, analysis: Analysis, wd: WeightedDensity):
+    def __init__(self: 'RosenfeldQ3', analysis: Analysis, wd: WeightedDensity) -> None:
         super(RosenfeldQ3, self).__init__(analysis)
         self._wd = wd
-        self._calc_functional_expressions()
+        self.__calc_functional_expressions()
 
-    def _calc_functional_expressions(self):
+    def __calc_functional_expressions(self: 'RosenfeldQ3') -> None:
         n2, n3, n2v = sy.symbols("n2 n3 n2v", real=True)
         n1 = n2 / (2*sy.pi)
         n1v = n2v / (2*sy.pi)
@@ -32,12 +32,15 @@ class RosenfeldQ3(Fexc):
             WD.PSI2V: sy.lambdify([n2, n3, n2v], sy.simplify(phi.diff(n2v))),
         }
 
-    def fexc(self, rho: Tuple[np.ndarray, np.ndarray], wd: Tuple[np.ndarray, np.ndarray, np.ndarray] = None) -> float:
+    def fexc(self: 'RosenfeldQ3', rho: Tuple[np.ndarray, np.ndarray],
+             wd: Tuple[np.ndarray, np.ndarray, np.ndarray] = None) -> float:
         n2, n3, n2v = self.__get_weighted_densities(rho, wd)
         phi = self._phi(n2, n3, n2v)
         return self._ana.integrate(phi)
 
-    def __get_weighted_densities(self, rho, wd):
+    def __get_weighted_densities(self: 'RosenfeldQ3', rho: Tuple[np.ndarray, np.ndarray],
+                                 wd: Tuple[np.ndarray, np.ndarray, np.ndarray] = None)\
+            -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         try:
             n2, n3, n2v = cast(Tuple[np.ndarray, np.ndarray, np.ndarray], wd)
         except TypeError:
@@ -45,8 +48,8 @@ class RosenfeldQ3(Fexc):
             n2, n3, n2v = self._wd.calc_densities([WD.N2, WD.N3, WD.N2V], rho_tot)
         return n2, n3, n2v
 
-    def d_fexc_d_rho(self, rho: Tuple[np.ndarray, np.ndarray], wd: Tuple[np.ndarray, np.ndarray, np.ndarray] = None)\
-            -> Tuple[np.ndarray, np.ndarray]:
+    def d_fexc_d_rho(self: 'RosenfeldQ3', rho: Tuple[np.ndarray, np.ndarray],
+                     wd: Tuple[np.ndarray, np.ndarray, np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray]:
         n2, n3, n2v = self.__get_weighted_densities(rho, wd)
         dphi = {wd: self._dphi[wd](n2, n3, n2v) for wd in [WD.PSI2, WD.PSI3, WD.PSI2V]}
 
@@ -54,7 +57,8 @@ class RosenfeldQ3(Fexc):
         s = psi2 + psi3 + psi2v
         return s, s
 
-    def fexc_and_d_fexc(self, rho: Tuple[np.ndarray, np.ndarray]) -> Tuple[float, np.ndarray, np.ndarray]:
+    def fexc_and_d_fexc(self: 'RosenfeldQ3', rho: Tuple[np.ndarray, np.ndarray]) \
+            -> Tuple[float, np.ndarray, np.ndarray]:
         rho_tot = rho[0] + rho[1]
         wd = cast(Tuple[np.ndarray, np.ndarray, np.ndarray],
                   tuple(self._wd.calc_densities([WD.N2, WD.N3, WD.N2V], rho_tot)))

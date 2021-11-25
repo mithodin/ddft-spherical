@@ -5,7 +5,7 @@ from analysis import Analysis
 from fexc.calculate_weights import WeightCalculator
 
 
-def test_volume_integral():
+def test_volume_integral() -> None:
     wc = WeightCalculator()
     n = 512
     dr = 2**-7
@@ -17,7 +17,7 @@ def test_volume_integral():
     assert weights == approx(ana.weights)
 
 
-def test_partial_integral():
+def test_partial_integral() -> None:
     wc = WeightCalculator()
     n = 128
     dr = 2**-7

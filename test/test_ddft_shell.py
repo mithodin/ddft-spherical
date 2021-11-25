@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 import pytest
 
@@ -11,9 +13,11 @@ from fexc.weighted_density import WeightedDensity
 precision_ideal = 15
 # TODO change this to higher number. atm f_exc does not support this
 precision_hard_spheres = 4
+TestInputData = Tuple[int, float, np.ndarray, np.ndarray, Tuple[np.ndarray, np.ndarray] | None, np.ndarray, np.ndarray,
+                      np.ndarray, np.ndarray]
 
 
-def input_data_ideal():
+def input_data_ideal() -> TestInputData:
     n = 8
     rho_bulk = 1.
 
@@ -146,7 +150,7 @@ def input_data_ideal():
 
 
 @pytest.mark.parametrize("input_data", input_data_ideal())
-def test_ideal_gas(input_data):
+def test_ideal_gas(input_data: TestInputData) -> None:
     n, rho_bulk, rho_s_0, rho_d_0, f_ext, j_s_expected, j_d_expected, rho_s_expected, rho_d_expected = input_data
 
     dr = 1
@@ -164,7 +168,7 @@ def test_ideal_gas(input_data):
     np.testing.assert_almost_equal(rho_d_expected, rho_d_1, decimal=precision_ideal)
 
 
-def input_data_hard_spheres():
+def input_data_hard_spheres() -> None:
     n = 4096
     rho_bulk = 1.
 
@@ -187,7 +191,7 @@ def input_data_hard_spheres():
 
 
 @pytest.mark.parametrize("input_data", input_data_hard_spheres())
-def test_hard_spheres(input_data):
+def test_hard_spheres(input_data: TestInputData) -> None:
     n, rho_bulk, rho_s_0, rho_d_0, f_ext, j_s_expected, j_d_expected, rho_s_expected, rho_d_expected = input_data
 
     dr = 1/128
@@ -207,7 +211,7 @@ def test_hard_spheres(input_data):
     np.testing.assert_almost_equal(rho_d_expected, rho_d_1, decimal=precision_hard_spheres)
 
 
-def test_to_shell_and_back():
+def test_to_shell_and_back() -> None:
     dr = 1
     n = 8
     rho_bulk = 1.

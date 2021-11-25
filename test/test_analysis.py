@@ -1,10 +1,10 @@
 import numpy as np
-from pytest import approx
 
+from pytest import approx
 from analysis import Analysis
 
 
-def test_weights():
+def test_weights() -> None:
     dr = 2**-3
     n = 512
     ana = Analysis(dr, n)
@@ -13,7 +13,7 @@ def test_weights():
     assert ana.weights[n-1] == approx(np.pi*dr**3/3*(6*(n-1)**2-4*(n-1)+1))
 
 
-def test_integral():
+def test_integral() -> None:
     dr = 2**-3
     n = 512
     ana = Analysis(dr, n)
@@ -24,7 +24,7 @@ def test_integral():
     assert ana.integrate(f) == approx(np.pi*((n-1)*dr)**4)
 
 
-def test_gradient():
+def test_gradient() -> None:
     dr = 2**-3
     n = 512
     ana = Analysis(dr, n)
@@ -38,7 +38,7 @@ def test_gradient():
     assert ana.gradient(f) == approx(np.arange(n)*dr)
 
 
-def test_delta():
+def test_delta() -> None:
     dr = 2**-7
     n = 64
     ana = Analysis(dr, n)
@@ -47,7 +47,7 @@ def test_delta():
     assert ana.integrate(delta) == approx(1.0)
 
 
-def test_divergence():
+def test_divergence() -> None:
     dr = 2**-7
     n = 4096
 
@@ -62,7 +62,7 @@ def test_divergence():
     print(ana._div_op)
 
 
-def test_extrapolate():
+def test_extrapolate() -> None:
     dr = 2 ** -3
     n = 32
     ana = Analysis(dr, n)

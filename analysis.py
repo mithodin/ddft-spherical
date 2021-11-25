@@ -1,23 +1,22 @@
 from typing import Tuple
 
-import numpy
 import numpy as np
 from scipy import sparse
 
 
 class Analysis:
-    def __init__(self, dr: float, n: int):
+    def __init__(self: 'Analysis', dr: float, n: int) -> None:
         self.dr = dr
         self.n = n
         self.__init_weights()
         self.__init_weights_shell()
 
-    def __init_weights(self):
+    def __init_weights(self: 'Analysis') -> None:
         dr, n, weights = self.__init_integral()
         self.__init_divergence(dr, n, weights)
         self.__init_gradient(dr, n)
 
-    def __init_integral(self):
+    def __init_integral(self: 'Analysis') -> Tuple[float, int, np.ndarray]:
         n = self.n
         dr = self.dr
         weights = (6 * np.arange(n, dtype=np.float64) ** 2 + 1) * 2.0
@@ -27,7 +26,7 @@ class Analysis:
         self.weights = weights
         return dr, n, weights
 
-    def __init_gradient(self, dr, n):
+    def __init_gradient(self: 'Analysis', dr: float, n: int) -> None:
         grad_op = np.zeros((n, n), dtype=np.float64)
         grad_op[0, 0:3] = [-3. / 2., 2., -1. / 2.]
         grad_op[-1, n - 3:n] = [1. / 2., -2., 3. / 2.]
@@ -43,7 +42,7 @@ class Analysis:
         fwd_grad_op /= dr
         self._fwd_grad_op = sparse.csr_matrix(fwd_grad_op)
 
-    def __init_divergence(self, dr, n, weights):
+    def __init_divergence(self: 'Analysis', dr: float, n: int, weights: np.ndarray) -> None:
         div_op = np.zeros((n, n), dtype=np.float64)
         k = np.arange(n, dtype=np.float64)
         k_intermediate = ((k+0.5)**3 + (k+0.5)/4)**(1./3.) - k
@@ -59,31 +58,31 @@ class Analysis:
         div_op *= -4*np.pi*dr**2/(weights.reshape(-1, 1))
         self._div_op = sparse.csr_matrix(div_op)
 
-    def __init_weights_shell(self):
+    def __init_weights_shell(self: 'Analysis') -> None:
         self.weights_shell = np.ones(self.n - 1)
         self.weights_shell *= self.dr
 
-    def integrate(self, f: np.ndarray):
+    def integrate(self: 'Analysis', f: np.ndarray) -> float:
         return np.sum(f * self.weights)
 
-    def integrate_shell(self, f: np.ndarray):
+    def integrate_shell(self: 'Analysis', f: np.ndarray) -> float:
         return np.sum(f * self.weights_shell)
 
-    def gradient(self, f: np.ndarray):
+    def gradient(self: 'Analysis', f: np.ndarray) -> np.ndarray:
         return self._grad_op.dot(f)
 
-    def forward_gradient(self, f: np.ndarray):
+    def forward_gradient(self: 'Analysis', f: np.ndarray) -> np.ndarray:
         return self._fwd_grad_op.dot(f)
 
-    def delta(self) -> np.ndarray:
+    def delta(self: 'Analysis') -> np.ndarray:
         res = np.zeros(self.n)
         res[0] = 1.0/self.weights[0]
         return res
 
-    def divergence(self, f: np.ndarray) -> np.ndarray:
+    def divergence(self: 'Analysis', f: np.ndarray) -> np.ndarray:
         return self._div_op.dot(f)
 
-    def extrapolate(self, f: np.ndarray, fitrange: Tuple[int, int], extrapolate: Tuple[int, int])\
+    def extrapolate(self: 'Analysis', f: np.ndarray, fitrange: Tuple[int, int], extrapolate: Tuple[int, int])\
             -> np.ndarray:
         offset = fitrange[1] - 1
         x_fit = np.arange(*fitrange) - offset

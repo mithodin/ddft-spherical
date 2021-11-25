@@ -5,7 +5,7 @@ from analysis import Analysis
 from diffusion import Diffusion
 
 
-def test_diffusion():
+def test_diffusion() -> None:
     dr = 2**-7
     n = 4096
     dt = 10**-7
@@ -18,7 +18,7 @@ def test_diffusion():
     ana = Analysis(dr, n)
     diff = Diffusion(ana, dt)
 
-    def msd(f):
+    def msd(f: np.ndarray) -> float:
         return ana.integrate(f*r2)/ana.integrate(f)
 
     msd0 = msd(gauss)

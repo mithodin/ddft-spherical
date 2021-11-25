@@ -1,13 +1,16 @@
+from typing import Callable, Tuple, Dict
+
 import sympy as s
 import numpy as np
 
 
-def get_coefficient_calculator(w_func, coeff, dr):
+def get_coefficient_calculator(w_func: Callable[[float, int], float], coeff: float, dr: float)\
+        -> Callable[[int], float]:
     return lambda k: coeff*w_func(dr, k)
 
 
 class WeightCalculator:
-    def __init__(self):
+    def __init__(self: 'WeightCalculator') -> None:
         self.r = s.symbols('r', real=True)
         self.r0, self.r1 = s.symbols('r0 r1', real=True)
         self.k = s.symbols('k', integer=True)
@@ -18,9 +21,10 @@ class WeightCalculator:
             (1+(self.r-self.k*self.dr)/self.dr, self.r < self.k*self.dr),
             (1-(self.r-self.k*self.dr)/self.dr, self.r < self.k*self.dr + self.dr),
             (0, self.r >= self.k*self.dr + self.dr))
-        self._int_cache = dict()
+        self._int_cache: Dict[str, Callable[[float, int], float]] = dict()
 
-    def get_weights(self, prefactor, n: int, i0: int, i1: int, dr: float):
+    def get_weights(self: 'WeightCalculator', prefactor: s.Expr, n: int, i0: int, i1: int, dr: float)\
+            -> np.ndarray:
         w0, wm, w = self._get_cached_integral(prefactor, dr)
         return np.hstack((
             np.zeros(i0, dtype=np.double),
@@ -30,7 +34,8 @@ class WeightCalculator:
             np.zeros(n-i1-1, dtype=np.double)
         ))
 
-    def _get_cached_integral(self, prefactor, dr):
+    def _get_cached_integral(self: 'WeightCalculator', prefactor: s.Expr, dr: float)\
+            -> Tuple[Callable[[int], float], Callable[[int], float], Callable[[int], float]]:
         w0 = []
         wm = []
         w = []

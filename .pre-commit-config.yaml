@@ -1,8 +1,13 @@
 repos:
-- repo: https://github.com/pycqa/flake8
-  rev: '4.0.1'
+- repo: local
   hooks:
   - id: flake8
+    name: Flake8
+    description: run flake8 linter
+    entry: pipenv run flake8
+    language: python
+    types: [python]
+    require_serial: true
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: 'v0.910-1'
   hooks:

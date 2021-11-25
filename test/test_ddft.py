@@ -6,7 +6,7 @@ from diffusion import Diffusion
 from fexc.fexc import Fexc
 
 
-def test_free_diffusion():
+def test_free_diffusion() -> None:
     dr = 2**-7
     n = 4096
     dt = 10**-7
@@ -27,7 +27,7 @@ def test_free_diffusion():
         np.testing.assert_almost_equal(rho, f)
 
 
-def test_j_exc():
+def test_j_exc() -> None:
     dr = 2**-7
     n = 4096
     dt = 10**-7

@@ -14,12 +14,12 @@ class WhiteBearIITensorial(Fexc):
     J. Phys. Cond. Mat. 22, 0631002 (2010) for an introduction and review
     """
 
-    def __init__(self, analysis: Analysis, wd: WeightedDensity):
+    def __init__(self: 'WhiteBearIITensorial', analysis: Analysis, wd: WeightedDensity) -> None:
         super(WhiteBearIITensorial, self).__init__(analysis)
         self._wd = wd
-        self._calc_functional_expressions()
+        self.__calc_functional_expressions()
 
-    def _calc_functional_expressions(self):
+    def __calc_functional_expressions(self: 'WhiteBearIITensorial') -> None:
         n2, n3, n2v, n11 = sy.symbols("n2 n3 n2v n11", real=True)
         n1 = n2 / (2*sy.pi)
         n1v = n2v / (2*sy.pi)
@@ -36,7 +36,7 @@ class WhiteBearIITensorial(Fexc):
             WD.PSI11: sy.lambdify([n2, n3, n2v, n11], sy.simplify(phi.diff(n11)))
         }
 
-    def fexc(self, rho: Tuple[np.ndarray, np.ndarray],
+    def fexc(self: 'WhiteBearIITensorial', rho: Tuple[np.ndarray, np.ndarray],
              wd: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] = None) -> float:
         try:
             n2, n3, n2v, n11 = cast(Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], wd)
@@ -46,7 +46,7 @@ class WhiteBearIITensorial(Fexc):
         phi = self._phi(n2, n3, n2v, n11)
         return self._ana.integrate(phi)
 
-    def d_fexc_d_rho(self, rho: Tuple[np.ndarray, np.ndarray],
+    def d_fexc_d_rho(self: 'WhiteBearIITensorial', rho: Tuple[np.ndarray, np.ndarray],
                      wd: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray]:
         try:
             n2, n3, n2v, n11 = cast(Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], wd)
@@ -61,7 +61,8 @@ class WhiteBearIITensorial(Fexc):
         s = psi2 + psi3 + psi2v + psi11
         return s, s
 
-    def fexc_and_d_fexc(self, rho: Tuple[np.ndarray, np.ndarray]) -> Tuple[float, np.ndarray, np.ndarray]:
+    def fexc_and_d_fexc(self: 'WhiteBearIITensorial', rho: Tuple[np.ndarray, np.ndarray])\
+            -> Tuple[float, np.ndarray, np.ndarray]:
         rho_tot = rho[0] + rho[1]
         wd = cast(Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
                   tuple(self._wd.calc_densities([WD.N2, WD.N3, WD.N2V, WD.N11], rho_tot)))

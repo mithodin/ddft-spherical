@@ -8,5 +8,5 @@ class Logger:
     Base class to implement logging for the simulation.
     Extend this class to implement your own logger.
     """
-    def log_state(self, body: List[Tuple[str, np.ndarray]], header: Dict[str, float] = None) -> None:
+    def log_state(self: 'Logger', body: List[Tuple[str, np.ndarray]], header: Dict[str, float] = None) -> None:
         pass
