@@ -26,7 +26,8 @@ from fexc.loader import load_functional
 from initial import load_initial
 from util import log_state, log, get_functional_config
 
-if __name__ == "__main__":
+
+def main():
     log("*** trying to load config ***")
     try:
         configfile = sys.argv[1]
@@ -34,24 +35,19 @@ if __name__ == "__main__":
         configfile = "config.jsonc"
     with open(configfile, "r") as cf_file:
         config = commentjson.load(cf_file)
-
     log("*** initializing ***")
     dr, num_bins, bulk_density, rho_self, rho_dist = load_initial(config["initial_state"])
     log(" > initial state loaded.")
-
     base_functional, variant = get_functional_config(config)
     analysis = Analysis(dr, num_bins)
     f_exc = load_functional(base_functional, variant, analysis)
-
     log(" > functional loaded.")
     log("*** starting integration ***")
-
     r = np.arange(num_bins) * dr
     j_s = np.zeros(num_bins)
     j_d = np.zeros(num_bins)
     D_rho_shell_self = np.zeros(num_bins)
     D_rho_shell_dist = np.zeros(num_bins)
-
     t0 = 0
     ddft = None
     for phase in config["integration"]:
@@ -98,3 +94,7 @@ if __name__ == "__main__":
         "norm_dist": norm_dist
     })
     log("*** done, have a nice day ***")
+
+
+if __name__ == "__main__":
+    main()
