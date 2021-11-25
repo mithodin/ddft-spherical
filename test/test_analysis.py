@@ -60,3 +60,17 @@ def test_divergence():
     assert ana.divergence(j)[:-1] == approx(np.ones(n-1))
 
     print(ana._div_op)
+
+
+def test_extrapolate():
+    dr = 2 ** -3
+    n = 32
+    ana = Analysis(dr, n)
+
+    f = np.arange(n) * dr
+    f_extrapolated = ana.extrapolate(f.copy(), (8, 17), (17, 32))
+    assert f_extrapolated == approx(f)
+
+    f = np.arange(n) * dr + 10.0
+    f_extrapolated = ana.extrapolate(f.copy(), (8, 17), (17, 32))
+    assert f_extrapolated == approx(f)

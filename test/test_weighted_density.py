@@ -97,19 +97,3 @@ def test_weighted_densities():
     assert psi2_discrete[:-mask] == approx(psi2_ana[:-mask], rel=1e-5)
     assert psi2v_discrete[mask // 2:-mask] == approx(psi2v_ana[mask // 2:-mask], rel=2e-3)
     assert psi11_discrete[mask // 2:-mask] == approx(psi11_ana[mask // 2:-mask], rel=2e-3)
-
-
-def test_extrapolate():
-    dr = 2 ** -3
-    n = 32
-    ana = Analysis(dr, n)
-    wc = WeightCalculator()
-    wd = WeightedDensity(ana, wc)
-
-    f = np.arange(n) * dr
-    f_extrapolated = wd.__extrapolate(f.copy(), (8, 17), (17, 32))
-    assert f_extrapolated == approx(f)
-
-    f = np.arange(n) * dr + 10.0
-    f_extrapolated = wd.__extrapolate(f.copy(), (8, 17), (17, 32))
-    assert f_extrapolated == approx(f)
