@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 
 from analysis import Analysis
@@ -15,13 +17,13 @@ class Quenched(Fexc):
         self._base_functional = base
         self._zeros = np.zeros(analysis.n, dtype=np.float64)
 
-    def fexc(self, rho: (np.array, np.array)) -> float:
+    def fexc(self, rho: Tuple[np.ndarray, np.ndarray]) -> float:
         return self._base_functional.fexc(rho) - self._base_functional.fexc((rho[0], self._zeros))
 
-    def d_fexc_d_rho(self, rho: (np.array, np.array)) -> (np.array, np.array):
+    def d_fexc_d_rho(self, rho: Tuple[np.ndarray, np.ndarray]) -> Tuple[np.ndarray, np.ndarray]:
         grad_full = self._base_functional.d_fexc_d_rho(rho)
         grad_self = self._base_functional.d_fexc_d_rho((rho[0], self._zeros))
         return grad_full[0] - grad_self[0], grad_full[1]
 
-    def fexc_and_d_fexc(self, rho: (np.array, np.array)) -> (float, np.array, np.array):
+    def fexc_and_d_fexc(self, rho: Tuple[np.ndarray, np.ndarray]) -> Tuple[float, np.ndarray, np.ndarray]:
         return self.fexc(rho), *self.d_fexc_d_rho(rho)

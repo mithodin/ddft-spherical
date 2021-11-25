@@ -1,6 +1,5 @@
-from typing import Tuple
-
 import numpy as np
+from typing import Tuple
 from analysis import Analysis
 from cutoff import Cutoff
 from fexc.fexc import Fexc

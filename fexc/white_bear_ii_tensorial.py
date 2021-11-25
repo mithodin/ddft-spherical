@@ -1,6 +1,7 @@
 import sympy as sy
 import numpy as np
 
+from typing import Tuple, cast
 from analysis import Analysis
 from fexc.fexc import Fexc
 from fexc.weighted_density import WeightedDensity, WD
@@ -35,19 +36,20 @@ class WhiteBearIITensorial(Fexc):
             WD.PSI11: sy.lambdify([n2, n3, n2v, n11], sy.simplify(phi.diff(n11)))
         }
 
-    def fexc(self, rho: (np.array, np.array), wd: (np.array, np.array, np.array, np.array) = None) -> float:
+    def fexc(self, rho: Tuple[np.ndarray, np.ndarray],
+             wd: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] = None) -> float:
         try:
-            n2, n3, n2v, n11 = wd
+            n2, n3, n2v, n11 = cast(Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], wd)
         except TypeError:
             rho_tot = rho[0] + rho[1]
             n2, n3, n2v, n11 = self._wd.calc_densities([WD.N2, WD.N3, WD.N2V, WD.N11], rho_tot)
         phi = self._phi(n2, n3, n2v, n11)
         return self._ana.integrate(phi)
 
-    def d_fexc_d_rho(self, rho: (np.array, np.array), wd: (np.array, np.array, np.array, np.array) = None)\
-            -> (np.array, np.array):
+    def d_fexc_d_rho(self, rho: Tuple[np.ndarray, np.ndarray],
+                     wd: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray]:
         try:
-            n2, n3, n2v, n11 = wd
+            n2, n3, n2v, n11 = cast(Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], wd)
         except TypeError:
             rho_tot = rho[0] + rho[1]
             n2, n3, n2v, n11 = self._wd.calc_densities([WD.N2, WD.N3, WD.N2V, WD.N11], rho_tot)
@@ -59,7 +61,9 @@ class WhiteBearIITensorial(Fexc):
         s = psi2 + psi3 + psi2v + psi11
         return s, s
 
-    def fexc_and_d_fexc(self, rho: (np.array, np.array)) -> (float, np.array, np.array):
+    def fexc_and_d_fexc(self, rho: Tuple[np.ndarray, np.ndarray]) -> Tuple[float, np.ndarray, np.ndarray]:
         rho_tot = rho[0] + rho[1]
-        wd = self._wd.calc_densities([WD.N2, WD.N3, WD.N2V, WD.N11], rho_tot)
-        return self.fexc(rho, wd), *self.d_fexc_d_rho(rho, wd)
+        wd = cast(Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+                  tuple(self._wd.calc_densities([WD.N2, WD.N3, WD.N2V, WD.N11], rho_tot)))
+        grad_self, grad_dist = self.d_fexc_d_rho(rho, wd)
+        return self.fexc(rho, wd), grad_self, grad_dist

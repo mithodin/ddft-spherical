@@ -17,8 +17,8 @@
 import numpy as np
 import sys
 import commentjson
-from tqdm import tqdm
 
+from tqdm import tqdm
 from analysis import Analysis
 from ddft import DDFT
 from cutoff import Cutoff

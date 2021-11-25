@@ -1,8 +1,9 @@
 import os
 import sys
-
 import numpy as np
 import hashlib
+
+from typing import List, Tuple, Dict, Any
 from enum import Enum, unique, auto
 from scipy import sparse
 from analysis import Analysis
@@ -28,7 +29,7 @@ class WD(Enum):
 
 
 class WeightedDensity:
-    _cachedir = './.cache/'
+    _cache_dir = './.cache/'
     _version = 1
 
     def __init__(self, analysis: Analysis, wc: WeightCalculator, size_sphere: float = 1.0):
@@ -36,7 +37,7 @@ class WeightedDensity:
         self._size_sphere = size_sphere
         # measured in bins
         self._radius_sphere = int(size_sphere / analysis.dr) // 2  # hope you chose values that work
-        self._coefficients = dict()
+        self._coefficients: Dict[WD, Any] = dict()
         self._wc = wc
         self.__calc_coefficients()
         self._r = np.arange(self._ana.n)*self._ana.dr
@@ -59,13 +60,13 @@ class WeightedDensity:
             self.__calc_n2v_coeff()
             self.__calc_n11_coeff()
             weights = {"{}".format(wd): self._coefficients[wd].toarray() for wd in WD}
-            if not os.path.isdir(self._cachedir):
-                os.mkdir(self._cachedir)
+            if not os.path.isdir(self._cache_dir):
+                os.mkdir(self._cache_dir)
             np.savez_compressed(filename, **weights)
 
     def __get_filename(self, signature):
         hash = hashlib.sha1(signature.encode('utf-8')).hexdigest()
-        return "{cache}/{hash}.npz".format(hash=hash, cache=self._cachedir)
+        return "{cache}/{hash}.npz".format(hash=hash, cache=self._cache_dir)
 
     def __calc_n3_coeff(self):
         wn3 = np.zeros((self._ana.n, self._ana.n))
@@ -168,7 +169,8 @@ class WeightedDensity:
         self._coefficients[WD.N11] = sparse.csr_matrix(wn11)
         self._coefficients[WD.PSI11] = sparse.csr_matrix(wpsi11)
 
-    def __extrapolate(self, f: np.array, fitrange: (float, float), extrapolate: (float, float)) -> np.array:
+    def __extrapolate(self, f: np.ndarray, fitrange: Tuple[int, int], extrapolate: Tuple[int, int])\
+            -> np.ndarray:
         offset = fitrange[1] - 1
         x_fit = np.arange(*fitrange) - offset
         x_extrapolate = np.arange(*extrapolate) - offset
@@ -176,11 +178,11 @@ class WeightedDensity:
         f[extrapolate[0]:extrapolate[1]] = f[offset] + slope * x_extrapolate
         return f
 
-    def calc_density(self, which: WD, rho: np.array):
+    def calc_density(self, which: WD, rho: np.ndarray) -> np.ndarray:
         nn = self._coefficients[which].dot(rho)
         return self.__extrapolate(nn,
                                   (self._ana.n - 3 * self._radius_sphere, self._ana.n - self._radius_sphere),
                                   (self._ana.n - self._radius_sphere, self._ana.n))
 
-    def calc_densities(self, which: list[WD], rho: np.array) -> list[np.array]:
+    def calc_densities(self, which: List[WD], rho: np.ndarray) -> List[np.ndarray]:
         return [self.calc_density(wd, rho) for wd in which]

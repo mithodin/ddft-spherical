@@ -1,7 +1,5 @@
-from typing import Tuple
-
 import numpy as np
-
+from typing import Tuple
 from cutoff import Cutoff
 
 
