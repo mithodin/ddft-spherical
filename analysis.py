@@ -10,11 +10,11 @@ class Analysis:
         self.__init_weights_shell()
     
     def __init_weights(self):
-        dr, n, weights = self._init_integral()
-        self._init_divergence(dr, n, weights)
-        self._init_gradient(dr, n)
+        dr, n, weights = self.__init_integral()
+        self.__init_divergence(dr, n, weights)
+        self.__init_gradient(dr, n)
 
-    def _init_integral(self):
+    def __init_integral(self):
         n = self.n
         dr = self.dr
         weights = (6 * np.arange(n, dtype=np.float64) ** 2 + 1) * 2.0
@@ -24,7 +24,7 @@ class Analysis:
         self.weights = weights
         return dr, n, weights
 
-    def _init_gradient(self, dr, n):
+    def __init_gradient(self, dr, n):
         grad_op = np.zeros((n, n), dtype=np.float64)
         grad_op[0, 0:3] = [-3. / 2., 2., -1. / 2.]
         grad_op[-1, n - 3:n] = [1. / 2., -2., 3. / 2.]
@@ -40,7 +40,7 @@ class Analysis:
         fwd_grad_op /= dr
         self._fwd_grad_op = sparse.csr_matrix(fwd_grad_op)
 
-    def _init_divergence(self, dr, n, weights):
+    def __init_divergence(self, dr, n, weights):
         div_op = np.zeros((n, n), dtype=np.float64)
         k = np.arange(n, dtype=np.float64)
         k_intermediate = ((k+0.5)**3 + (k+0.5)/4)**(1./3.) - k
