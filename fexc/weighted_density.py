@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import hashlib
 
-from typing import List, Tuple, Dict, Any
+from typing import List, Dict, Any
 from enum import Enum, unique, auto
 from scipy import sparse
 from analysis import Analysis
@@ -169,20 +169,11 @@ class WeightedDensity:
         self._coefficients[WD.N11] = sparse.csr_matrix(wn11)
         self._coefficients[WD.PSI11] = sparse.csr_matrix(wpsi11)
 
-    def __extrapolate(self, f: np.ndarray, fitrange: Tuple[int, int], extrapolate: Tuple[int, int])\
-            -> np.ndarray:
-        offset = fitrange[1] - 1
-        x_fit = np.arange(*fitrange) - offset
-        x_extrapolate = np.arange(*extrapolate) - offset
-        slope = (x_fit*(f[fitrange[0]:fitrange[1]] - f[fitrange[1]-1])).sum() / (x_fit**2).sum()
-        f[extrapolate[0]:extrapolate[1]] = f[offset] + slope * x_extrapolate
-        return f
-
     def calc_density(self, which: WD, rho: np.ndarray) -> np.ndarray:
         nn = self._coefficients[which].dot(rho)
-        return self.__extrapolate(nn,
-                                  (self._ana.n - 3 * self._radius_sphere, self._ana.n - self._radius_sphere),
-                                  (self._ana.n - self._radius_sphere, self._ana.n))
+        return self._ana.extrapolate(nn,
+                                     (self._ana.n - 3 * self._radius_sphere, self._ana.n - self._radius_sphere),
+                                     (self._ana.n - self._radius_sphere, self._ana.n))
 
     def calc_densities(self, which: List[WD], rho: np.ndarray) -> List[np.ndarray]:
         return [self.calc_density(wd, rho) for wd in which]

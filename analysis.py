@@ -1,3 +1,6 @@
+from typing import Tuple
+
+import numpy
 import numpy as np
 from scipy import sparse
 
@@ -72,10 +75,19 @@ class Analysis:
     def forward_gradient(self, f: np.ndarray):
         return self._fwd_grad_op.dot(f)
 
-    def delta(self):
+    def delta(self) -> np.ndarray:
         res = np.zeros(self.n)
         res[0] = 1.0/self.weights[0]
         return res
 
-    def divergence(self, f):
+    def divergence(self, f: np.ndarray) -> np.ndarray:
         return self._div_op.dot(f)
+
+    def extrapolate(self, f: np.ndarray, fitrange: Tuple[int, int], extrapolate: Tuple[int, int])\
+            -> np.ndarray:
+        offset = fitrange[1] - 1
+        x_fit = np.arange(*fitrange) - offset
+        x_extrapolate = np.arange(*extrapolate) - offset
+        slope = (x_fit*(f[fitrange[0]:fitrange[1]] - f[fitrange[1]-1])).sum() / (x_fit**2).sum()
+        f[extrapolate[0]:extrapolate[1]] = f[offset] + slope * x_extrapolate
+        return f
