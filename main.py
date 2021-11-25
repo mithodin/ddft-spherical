@@ -20,8 +20,8 @@ import commentjson
 
 from tqdm import tqdm
 from analysis import Analysis
-from ddft import DDFT
 from cutoff import Cutoff
+from ddft_shell import DDFTShell
 from fexc.loader import load_functional
 from initial import load_initial
 from logger.ascii_logger import AsciiLogger
@@ -55,7 +55,8 @@ def main():
         small_steps = phase["small_steps"]
         big_steps = phase["big_steps"]
         simulation_time = phase["simulation_time"]
-        ddft = DDFT(analysis, 1.0 / small_steps / big_steps, f_exc, (rho_self, rho_dist), Cutoff(1e-70))
+        ddft = DDFTShell(analysis, 1.0 / small_steps / big_steps, f_exc, (rho_self, rho_dist), bulk_density,
+                         Cutoff(1e-70))
         for t in tqdm(range(int(simulation_time * big_steps)), position=0, desc='big steps', file=sys.stderr):
             norm_self, norm_dist = ddft.norms()
             logger.log_state([
