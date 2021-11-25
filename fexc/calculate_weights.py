@@ -41,9 +41,13 @@ class WeightCalculator:
                 weights = self._int_cache[order]
             except KeyError:
                 nint = (self.r**order * self.base_function).integrate(self.r)
-                w0c = s.lambdify([self.dr, self.k], nint.replace(self.r, self.k*self.dr + self.dr)-nint.replace(self.r, self.k*self.dr))
-                wmc = s.lambdify([self.dr, self.k], nint.replace(self.r, self.k*self.dr)-nint.replace(self.r, self.k*self.dr - self.dr))
-                wc = s.lambdify([self.dr, self.k], nint.replace(self.r, self.k*self.dr + self.dr)-nint.replace(self.r, self.k*self.dr - self.dr))
+                w0c = s.lambdify([self.dr, self.k],
+                                 nint.replace(self.r, self.k*self.dr + self.dr)-nint.replace(self.r, self.k*self.dr))
+                wmc = s.lambdify([self.dr, self.k],
+                                 nint.replace(self.r, self.k*self.dr)-nint.replace(self.r, self.k*self.dr - self.dr))
+                wc = s.lambdify([self.dr, self.k],
+                                nint.replace(self.r, self.k*self.dr + self.dr)
+                                - nint.replace(self.r, self.k*self.dr - self.dr))
                 weights = {
                     'w0': w0c,
                     'wm': wmc,

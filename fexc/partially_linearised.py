@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 
 from analysis import Analysis
@@ -15,16 +17,16 @@ class PartiallyLinearised(Fexc):
         self._base_functional = base
         self._zeros = np.zeros(analysis.n, dtype=np.float64)
 
-    def fexc(self, rho: (np.array, np.array)) -> float:
+    def fexc(self, rho: Tuple[np.ndarray, np.ndarray]) -> float:
         # In the case of this functional, Fexc[rho_s, rho_d] is ill-defined as separate functionals are used for the
         # self and distinct density components
         return float("nan")
 
-    def d_fexc_d_rho(self, rho: (np.array, np.array)) -> (np.array, np.array):
+    def d_fexc_d_rho(self, rho: Tuple[np.ndarray, np.ndarray]) -> Tuple[np.ndarray, np.ndarray]:
         # lim rho_self -> 0
         grad_self = self._base_functional.d_fexc_d_rho((self._zeros, rho[1]))
         grad_dist = self._base_functional.d_fexc_d_rho(rho)
         return grad_self[0], grad_dist[1]
 
-    def fexc_and_d_fexc(self, rho: (np.array, np.array)) -> (float, np.array, np.array):
+    def fexc_and_d_fexc(self, rho: Tuple[np.ndarray, np.ndarray]) -> Tuple[float, np.ndarray, np.ndarray]:
         return self.fexc(rho), *self.d_fexc_d_rho(rho)

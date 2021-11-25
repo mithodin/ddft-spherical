@@ -1,8 +1,9 @@
 import os
 import sys
-
 import numpy as np
 import hashlib
+
+from typing import List, Tuple, Dict, Any
 from enum import Enum, unique, auto
 from scipy import sparse
 from analysis import Analysis
@@ -28,7 +29,7 @@ class WD(Enum):
 
 
 class WeightedDensity:
-    _cachedir = './.cache/'
+    _cache_dir = './.cache/'
     _version = 1
 
     def __init__(self, analysis: Analysis, wc: WeightCalculator, size_sphere: float = 1.0):
@@ -36,36 +37,38 @@ class WeightedDensity:
         self._size_sphere = size_sphere
         # measured in bins
         self._radius_sphere = int(size_sphere / analysis.dr) // 2  # hope you chose values that work
-        self._coefficients = dict()
+        self._coefficients: Dict[WD, Any] = dict()
         self._wc = wc
-        self._calc_coefficients()
+        self.__calc_coefficients()
         self._r = np.arange(self._ana.n)*self._ana.dr
 
-    def _calc_coefficients(self):
-        signature = "{n:.0f}-{dr:.10e}-{r_sphere:.0f}-{version:.0f}".format(n=self._ana.n, dr=self._ana.dr, r_sphere=self._radius_sphere, version=self._version)
-        filename = self._get_filename(signature)
+    def __calc_coefficients(self):
+        signature = "{n:.0f}-{dr:.10e}-{r_sphere:.0f}-{version:.0f}".format(n=self._ana.n, dr=self._ana.dr,
+                                                                            r_sphere=self._radius_sphere,
+                                                                            version=self._version)
+        filename = self.__get_filename(signature)
         try:
             print(" > trying to load weights from cache", file=sys.stderr)
             with np.load(filename) as cached:
                 for wd in WD:
                     self._coefficients[wd] = sparse.csr_matrix(cached["{}".format(wd)])
             print(" > cached weights loaded successfully", file=sys.stderr)
-        except:
+        except Exception:
             print(" > cache not found or error loading, calculating weights", file=sys.stderr)
-            self._calc_n3_coeff()
-            self._calc_n2_coeff()
-            self._calc_n2v_coeff()
-            self._calc_n11_coeff()
+            self.__calc_n3_coeff()
+            self.__calc_n2_coeff()
+            self.__calc_n2v_coeff()
+            self.__calc_n11_coeff()
             weights = {"{}".format(wd): self._coefficients[wd].toarray() for wd in WD}
-            if not os.path.isdir(self._cachedir):
-                os.mkdir(self._cachedir)
+            if not os.path.isdir(self._cache_dir):
+                os.mkdir(self._cache_dir)
             np.savez_compressed(filename, **weights)
 
-    def _get_filename(self, signature):
+    def __get_filename(self, signature):
         hash = hashlib.sha1(signature.encode('utf-8')).hexdigest()
-        return "{cache}/{hash}.npz".format(hash=hash, cache=self._cachedir)
+        return "{cache}/{hash}.npz".format(hash=hash, cache=self._cache_dir)
 
-    def _calc_n3_coeff(self):
+    def __calc_n3_coeff(self):
         wn3 = np.zeros((self._ana.n, self._ana.n))
         wn3[0, :] = self._wc.get_weights(4*np.pi*self._wc.r**2, self._ana.n, 0, self._radius_sphere, self._ana.dr)
         rp = self._wc.r
@@ -95,7 +98,7 @@ class WeightedDensity:
         self._coefficients[WD.N3] = sparse.csr_matrix(wn3)
         self._coefficients[WD.PSI3] = self._coefficients[WD.N3]
 
-    def _calc_n2_coeff(self):
+    def __calc_n2_coeff(self):
         wn2 = np.zeros((self._ana.n, self._ana.n))
         rp = self._wc.r
         R = self._size_sphere/2
@@ -116,7 +119,7 @@ class WeightedDensity:
         self._coefficients[WD.PSI1] = self._coefficients[WD.N1]
         self._coefficients[WD.PSI0] = self._coefficients[WD.N0]
 
-    def _calc_n2v_coeff(self):
+    def __calc_n2v_coeff(self):
         wn2v = np.zeros((self._ana.n, self._ana.n))
         wpsi2v = np.zeros((self._ana.n, self._ana.n))
         rp = self._wc.r
@@ -142,7 +145,7 @@ class WeightedDensity:
         self._coefficients[WD.PSI2V] = sparse.csr_matrix(wpsi2v)
         self._coefficients[WD.PSI1V] = sparse.csr_matrix(wpsi2v/(4*np.pi*R))
 
-    def _calc_n11_coeff(self):
+    def __calc_n11_coeff(self):
         wn11 = np.zeros((self._ana.n, self._ana.n))
         wpsi11 = np.zeros((self._ana.n, self._ana.n))
         rp = self._wc.r
@@ -166,7 +169,8 @@ class WeightedDensity:
         self._coefficients[WD.N11] = sparse.csr_matrix(wn11)
         self._coefficients[WD.PSI11] = sparse.csr_matrix(wpsi11)
 
-    def _extrapolate(self, f: np.array, fitrange: (float, float), extrapolate: (float, float)) -> np.array:
+    def __extrapolate(self, f: np.ndarray, fitrange: Tuple[int, int], extrapolate: Tuple[int, int])\
+            -> np.ndarray:
         offset = fitrange[1] - 1
         x_fit = np.arange(*fitrange) - offset
         x_extrapolate = np.arange(*extrapolate) - offset
@@ -174,9 +178,11 @@ class WeightedDensity:
         f[extrapolate[0]:extrapolate[1]] = f[offset] + slope * x_extrapolate
         return f
 
-    def calc_density(self, which: WD, rho: np.array):
+    def calc_density(self, which: WD, rho: np.ndarray) -> np.ndarray:
         nn = self._coefficients[which].dot(rho)
-        return self._extrapolate(nn, (self._ana.n - 3*self._radius_sphere, self._ana.n - self._radius_sphere), (self._ana.n - self._radius_sphere, self._ana.n))
+        return self.__extrapolate(nn,
+                                  (self._ana.n - 3 * self._radius_sphere, self._ana.n - self._radius_sphere),
+                                  (self._ana.n - self._radius_sphere, self._ana.n))
 
-    def calc_densities(self, which: list[WD], rho: np.array) -> list[np.array]:
+    def calc_densities(self, which: List[WD], rho: np.ndarray) -> List[np.ndarray]:
         return [self.calc_density(wd, rho) for wd in which]

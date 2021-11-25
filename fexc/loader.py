@@ -1,7 +1,6 @@
-import sys
-
 from analysis import Analysis
 from fexc.fexc import Fexc
+from util import log
 
 
 def load_functional(base: str, variant: str, analysis: Analysis) -> Fexc:
@@ -21,7 +20,7 @@ def load_functional(base: str, variant: str, analysis: Analysis) -> Fexc:
         wd = WeightedDensity(analysis, wc)
         f_base = WhiteBearIITensorial(analysis, wd)
     elif base is not None:
-        print("Warning: specified base functional '{}' not found, using zero excess functional instead".format(base), sys.stderr)
+        log("Warning: specified base functional '{}' not found, using zero excess functional instead".format(base))
 
     f_exc = f_base
     if variant == "partially_linearised":
@@ -31,5 +30,5 @@ def load_functional(base: str, variant: str, analysis: Analysis) -> Fexc:
         from fexc.quenched import Quenched
         f_exc = Quenched(analysis, f_base)
     elif variant is not None:
-        print("Warning: specified variant '{}' not found, using 'full' variant instead".format(variant), sys.stderr)
+        log("Warning: specified variant '{}' not found, using 'full' variant instead".format(variant))
     return f_exc

@@ -55,7 +55,7 @@ def input_data_ideal():
         rho_d_0,
         None,
         np.asarray([0, 0.25, 0.25, 0, 0, 0, 0, 0]),
-        np.asarray([0.25 + j1_d, j1_d, -0.25 , 0, 0, 0, 0, 0]),
+        np.asarray([0.25 + j1_d, j1_d, -0.25, 0, 0, 0, 0, 0]),
         np.asarray([np.exp((4 * np.log(0.4) - np.log(0.025)) / 3), 0.4, 0.025, 0, 0, 0, 0, 0]),
         np.asarray([np.exp((4 * np.log(0.6) - np.log(0.975)) / 3), 0.6, 0.975, 1, 1, 1, 1, 1]),
     ]
@@ -104,7 +104,9 @@ def input_data_ideal():
     rho_d_0 = rho_bulk - rho_s_0
 
     j_s_expected = np.asarray([0, -0.5, -0.5,  0.5,  0.5, -0.5, -0.5,  0.5])
-    rho_s_expected = np.asarray([np.exp((4 * np.log(0.2) - np.log(0.95)) / 3), 2/10, 1-1/20, 1-4/30, 3/40, 6/50, 1-5/60, 1-8/70])
+    rho_s_expected = np.asarray([
+        np.exp((4 * np.log(0.2) - np.log(0.95)) / 3), 2/10, 1-1/20, 1-4/30, 3/40, 6/50, 1-5/60, 1-8/70
+    ])
 
     # expectation: sum of densities unchanged
     j_d_expected = -j_s_expected
@@ -187,10 +189,10 @@ def input_data_hard_spheres():
 @pytest.mark.parametrize("input_data", input_data_hard_spheres())
 def test_hard_spheres(input_data):
     n, rho_bulk, rho_s_0, rho_d_0, f_ext, j_s_expected, j_d_expected, rho_s_expected, rho_d_expected = input_data
-    
+
     dr = 1/128
     dt = .1
-    
+
     ana = Analysis(dr, n)
     wc = WeightCalculator()
     wd = WeightedDensity(ana, wc)
