@@ -4,10 +4,11 @@ import sympy
 from sympy import Symbol, Number
 from typing import Tuple, Callable
 
+WDCalculator = Callable[[np.ndarray], np.ndarray]
+
 
 def calculate_analytic(R: Number, r: Symbol, rp: Symbol, rho: Number) \
-        -> Tuple[Callable[[float], float], Callable[[float], float], Callable[[float], float], Callable[[float], float],
-                 Callable[[float], float], Callable[[float], float]]:
+        -> Tuple[WDCalculator, WDCalculator, WDCalculator, WDCalculator, WDCalculator, WDCalculator]:
     n3 = sympy.lambdify([r], sympy.Piecewise(
         (4 * sympy.pi * sympy.integrate(rp ** 2 * rho, (rp, 0, R)), sympy.Eq(r, 0)),
         (4 * sympy.pi * sympy.integrate(rp ** 2 * rho, (rp, 0, R - r)) + sympy.pi / r * sympy.integrate(

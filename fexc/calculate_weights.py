@@ -1,7 +1,7 @@
-from typing import Callable, Tuple, Dict
-
 import sympy as s
 import numpy as np
+
+from typing import Callable, Tuple, Dict, cast
 
 
 def get_coefficient_calculator(w_func: Callable[[float, int], float], coeff: float, dr: float)\
@@ -21,7 +21,7 @@ class WeightCalculator:
             (1+(self.r-self.k*self.dr)/self.dr, self.r < self.k*self.dr),
             (1-(self.r-self.k*self.dr)/self.dr, self.r < self.k*self.dr + self.dr),
             (0, self.r >= self.k*self.dr + self.dr))
-        self._int_cache: Dict[str, Callable[[float, int], float]] = dict()
+        self._int_cache: Dict[int, Dict[str, Callable[[float, int], float]]] = dict()
 
     def get_weights(self: 'WeightCalculator', prefactor: s.Expr, n: int, i0: int, i1: int, dr: float)\
             -> np.ndarray:
@@ -54,9 +54,9 @@ class WeightCalculator:
                                 nint.replace(self.r, self.k*self.dr + self.dr)
                                 - nint.replace(self.r, self.k*self.dr - self.dr))
                 weights = {
-                    'w0': w0c,
-                    'wm': wmc,
-                    'w': wc
+                    'w0': cast(Callable[[float, int], float], w0c),
+                    'wm': cast(Callable[[float, int], float], wmc),
+                    'w': cast(Callable[[float, int], float], wc)
                 }
                 self._int_cache[order] = weights
             w0.append(get_coefficient_calculator(weights['w0'], coeff, dr))

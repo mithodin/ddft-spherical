@@ -1,9 +1,8 @@
-from typing import Tuple
-
 import numpy as np
 
+from typing import Tuple
 from analysis import Analysis
-from fexc.fexc import Fexc
+from .fexc import Fexc
 
 
 class Quenched(Fexc):

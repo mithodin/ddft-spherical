@@ -1,21 +1,21 @@
 from analysis import Analysis
-from fexc.fexc import Fexc
 from util import log
+from .fexc import Fexc
 
 
 def load_functional(base: str, variant: str, analysis: Analysis) -> Fexc:
     f_base = Fexc(analysis)
     if base == "rosenfeld_q3":
-        from fexc.calculate_weights import WeightCalculator
-        from fexc.weighted_density import WeightedDensity
-        from fexc.rosenfeld_q3 import RosenfeldQ3
+        from .calculate_weights import WeightCalculator
+        from .weighted_density import WeightedDensity
+        from .rosenfeld_q3 import RosenfeldQ3
         wc = WeightCalculator()
         wd = WeightedDensity(analysis, wc)
         f_base = RosenfeldQ3(analysis, wd)
     elif base == "white_bear_ii_tensorial":
-        from fexc.calculate_weights import WeightCalculator
-        from fexc.weighted_density import WeightedDensity
-        from fexc.white_bear_ii_tensorial import WhiteBearIITensorial
+        from .calculate_weights import WeightCalculator
+        from .weighted_density import WeightedDensity
+        from .white_bear_ii_tensorial import WhiteBearIITensorial
         wc = WeightCalculator()
         wd = WeightedDensity(analysis, wc)
         f_base = WhiteBearIITensorial(analysis, wd)
@@ -24,10 +24,10 @@ def load_functional(base: str, variant: str, analysis: Analysis) -> Fexc:
 
     f_exc = f_base
     if variant == "partially_linearised":
-        from fexc.partially_linearised import PartiallyLinearised
+        from .partially_linearised import PartiallyLinearised
         f_exc = PartiallyLinearised(analysis, f_base)
     elif variant == "quenched":
-        from fexc.quenched import Quenched
+        from .quenched import Quenched
         f_exc = Quenched(analysis, f_base)
     elif variant is not None:
         log("Warning: specified variant '{}' not found, using 'full' variant instead".format(variant))

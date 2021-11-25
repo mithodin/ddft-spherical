@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from typing import cast
 
 import numpy as np
 import sys
@@ -21,10 +22,11 @@ import commentjson
 from tqdm import tqdm
 from analysis import Analysis
 from cutoff import Cutoff
+from ddft import DDFT
 from ddft_shell import DDFTShell
-from fexc.loader import load_functional
+from fexc import load_functional
 from initial import load_initial
-from logger.ascii_logger import AsciiLogger
+from logger import AsciiLogger
 from util import log, get_functional_config
 
 
@@ -48,7 +50,7 @@ def main() -> None:
     j_s = np.zeros(num_bins)
     j_d = np.zeros(num_bins)
     t0 = 0
-    ddft = None
+    ddft = cast(DDFT, None)
     logger = AsciiLogger()
     for phase in config["integration"]:
         log(" > {} phase".format(phase["name"]))

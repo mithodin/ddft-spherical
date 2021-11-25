@@ -3,7 +3,7 @@ import numpy as np
 from analysis import Analysis
 from ddft import DDFT
 from diffusion import Diffusion
-from fexc.fexc import Fexc
+from fexc import Fexc
 
 
 def test_free_diffusion() -> None:

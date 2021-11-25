@@ -49,7 +49,7 @@ To do this, you need these steps:
  - create a new file inside the folder `fexc`.
  - in that file, create a new class that inherits from the class `Fexc`:
    ```
-   from fexc.fexc import Fexc
+   from fexc import Fexc
    
    class MyFancyFunctional(Fexc):
        pass

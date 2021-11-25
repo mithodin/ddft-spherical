@@ -2,10 +2,12 @@ import numpy as np
 from typing import Tuple
 from analysis import Analysis
 from cutoff import Cutoff
-from fexc.fexc import Fexc
+from fexc import Fexc
 
 
 class DDFT:
+    _ana: Analysis
+
     def __init__(self: 'DDFT', analysis: Analysis, dt: float, f_exc: Fexc, rho0: Tuple[np.ndarray, np.ndarray],
                  cutoff: Cutoff = None) -> None:
         self._ana = analysis

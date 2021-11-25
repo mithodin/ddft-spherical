@@ -3,8 +3,8 @@ import numpy as np
 
 from typing import Tuple, cast
 from analysis import Analysis
-from fexc.fexc import Fexc
-from fexc.weighted_density import WeightedDensity, WD
+from .fexc import Fexc
+from .weighted_density import WeightedDensity, WD
 
 
 class WhiteBearIITensorial(Fexc):

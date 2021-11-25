@@ -3,8 +3,7 @@ import sympy
 from pytest import approx
 
 from analysis import Analysis
-from fexc.calculate_weights import WeightCalculator
-from fexc.weighted_density import WeightedDensity, WD
+from fexc import WeightCalculator, WeightedDensity, WD
 from test_weighted_density_analytic import calculate_analytic
 
 

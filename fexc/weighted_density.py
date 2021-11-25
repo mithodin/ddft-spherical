@@ -7,7 +7,7 @@ from typing import List, Dict, Any
 from enum import Enum, unique, auto
 from scipy import sparse
 from analysis import Analysis
-from fexc.calculate_weights import WeightCalculator
+from .calculate_weights import WeightCalculator
 
 
 @unique
@@ -31,6 +31,7 @@ class WD(Enum):
 class WeightedDensity:
     _cache_dir = './.cache/'
     _version = 1
+    _ana: Analysis
 
     def __init__(self: 'WeightedDensity', analysis: Analysis, wc: WeightCalculator, size_sphere: float = 1.0) -> None:
         self._ana = analysis
@@ -65,14 +66,14 @@ class WeightedDensity:
             np.savez_compressed(filename, **weights)
 
     def __get_filename(self: 'WeightedDensity', signature: str) -> str:
-        hash = hashlib.sha1(signature.encode('utf-8')).hexdigest()
-        return "{cache}/{hash}.npz".format(hash=hash, cache=self._cache_dir)
+        hash_digest = hashlib.sha1(signature.encode('utf-8')).hexdigest()
+        return "{cache}/{hash}.npz".format(hash=hash_digest, cache=self._cache_dir)
 
     def __calc_n3_coeff(self: 'WeightedDensity') -> None:
         wn3 = np.zeros((self._ana.n, self._ana.n))
         wn3[0, :] = self._wc.get_weights(4*np.pi*self._wc.r**2, self._ana.n, 0, self._radius_sphere, self._ana.dr)
         rp = self._wc.r
-        R = self._size_sphere/2
+        radius_sphere = self._size_sphere/2
         for i in range(1, self._radius_sphere):
             r = i*self._ana.dr
             wn3[i, :] = self._wc.get_weights(
@@ -81,16 +82,16 @@ class WeightedDensity:
                     0, self._radius_sphere - i,
                     self._ana.dr)\
                 + self._wc.get_weights(
-                    np.pi/r*rp*(R**2-(r-rp)**2),
+                    np.pi/r*rp*(radius_sphere**2-(r-rp)**2),
                     self._ana.n,
                     self._radius_sphere - i, self._radius_sphere + i,
                     self._ana.dr)
         for i in range(self._radius_sphere, self._ana.n - self._radius_sphere):
             r = i*self._ana.dr
             rp = self._wc.r
-            R = self._size_sphere/2
+            radius_sphere = self._size_sphere/2
             wn3[i, :] = self._wc.get_weights(
-                np.pi/r*rp*(R**2-(r-rp)**2),
+                np.pi/r*rp*(radius_sphere**2-(r-rp)**2),
                 self._ana.n,
                 i - self._radius_sphere, i + self._radius_sphere,
                 self._ana.dr)

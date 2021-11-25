@@ -1,11 +1,11 @@
+from typing import cast, Any
+
 import numpy as np
 import sympy
 from pytest import approx
 
 from analysis import Analysis
-from fexc.calculate_weights import WeightCalculator
-from fexc.rosenfeld_q3 import RosenfeldQ3
-from fexc.weighted_density import WeightedDensity
+from fexc import RosenfeldQ3, WeightCalculator, WeightedDensity
 from test_weighted_density_analytic import calculate_analytic
 
 
@@ -13,7 +13,7 @@ def test_rf_expression() -> None:
     dr = 2 ** -3
     n = 32
     ana = Analysis(dr, n)
-    rf = RosenfeldQ3(ana, None)
+    rf = RosenfeldQ3(ana, cast(Any, None))
 
     n2 = np.array([0.5, 0.1, 0.2])
     n3 = np.array([0.1, 0.3, 0.8])

@@ -1,23 +1,19 @@
-from typing import Tuple
-
 import numpy as np
 import pytest
 
+from typing import Tuple, Generator, Union
 from analysis import Analysis
 from ddft_shell import DDFTShell
-from fexc.calculate_weights import WeightCalculator
-from fexc.fexc import Fexc
-from fexc.rosenfeld_q3 import RosenfeldQ3
-from fexc.weighted_density import WeightedDensity
+from fexc import Fexc, RosenfeldQ3, WeightedDensity, WeightCalculator
 
 precision_ideal = 15
 # TODO change this to higher number. atm f_exc does not support this
 precision_hard_spheres = 4
-TestInputData = Tuple[int, float, np.ndarray, np.ndarray, Tuple[np.ndarray, np.ndarray] | None, np.ndarray, np.ndarray,
-                      np.ndarray, np.ndarray]
+TestInputData = Tuple[int, float, np.ndarray, np.ndarray, Union[Tuple[np.ndarray, np.ndarray], None], np.ndarray,
+                      np.ndarray, np.ndarray, np.ndarray]
 
 
-def input_data_ideal() -> TestInputData:
+def input_data_ideal() -> Generator[TestInputData, None, None]:
     n = 8
     rho_bulk = 1.
 
@@ -30,7 +26,7 @@ def input_data_ideal() -> TestInputData:
     rho_d_0[0] = np.random.rand(1)
 
     # expectation: constant densities are unchanged
-    yield [
+    yield (
         n,
         rho_bulk,
         rho_s_0,
@@ -40,7 +36,7 @@ def input_data_ideal() -> TestInputData:
         np.zeros(n),
         np.zeros(n),
         np.ones(n) * rho_bulk
-    ]
+    )
 
     rho_s_0 = np.zeros(n)
     rho_d_0 = np.ones(n) * rho_bulk
@@ -52,7 +48,7 @@ def input_data_ideal() -> TestInputData:
     j1_d = -0.5 * (1 - np.exp((4 * np.log(0.5) - np.log(1)) / 3))
 
     # expectation: delta peak spreads, delta hole fills
-    yield [
+    yield (
         n,
         rho_bulk,
         rho_s_0,
@@ -62,7 +58,7 @@ def input_data_ideal() -> TestInputData:
         np.asarray([0.25 + j1_d, j1_d, -0.25, 0, 0, 0, 0, 0]),
         np.asarray([np.exp((4 * np.log(0.4) - np.log(0.025)) / 3), 0.4, 0.025, 0, 0, 0, 0, 0]),
         np.asarray([np.exp((4 * np.log(0.6) - np.log(0.975)) / 3), 0.6, 0.975, 1, 1, 1, 1, 1]),
-    ]
+    )
 
     rho_s_0 = np.zeros(n)
     rho_d_0 = np.ones(n) * rho_bulk
@@ -74,7 +70,7 @@ def input_data_ideal() -> TestInputData:
     f_ext = np.stack((f_ext, f_ext))
 
     # expectation: density is stationary (except innermost bin)
-    yield [
+    yield (
         n,
         rho_bulk,
         rho_s_0,
@@ -84,14 +80,14 @@ def input_data_ideal() -> TestInputData:
         np.asarray([1, 1, 1/4, 1/9, 1/16, 1/25, 1/36, 1/49]),
         np.asarray([0, 0, 0, 0, 0, 0, 0, 0]),
         np.asarray([np.exp((4 * np.log(0.9) - np.log(1)) / 3), 0.9, 1, 1, 1, 1, 1, 1])
-    ]
+    )
 
     # case: alternating density
     rho_s_0 = np.asarray([0, 1, 0, 1, 0, 1, 0, 1]) * rho_bulk
     rho_d_0 = rho_bulk - rho_s_0
 
     # expectation: sum of densities unchanged
-    yield [
+    yield (
         n,
         rho_bulk,
         rho_s_0,
@@ -101,7 +97,7 @@ def input_data_ideal() -> TestInputData:
         np.asarray([0, -0.5, 0, 0, 0, 0, 0, 0]),
         np.asarray([np.exp((4 * np.log(0.8) - np.log(0.2)) / 3), 0.8, 0.2, 0.8, 0.2, 0.8, 0.2, 0.8]),
         np.asarray([np.exp((4 * np.log(0.2) - np.log(0.8)) / 3), 0.2, 0.8, 0.2, 0.8, 0.2, 0.8, 0.2]),
-    ]
+    )
 
     # case: density alternating every second bin
     rho_s_0 = np.asarray([0, 0, 1, 1, 0, 0, 1, 1]) * rho_bulk
@@ -118,7 +114,7 @@ def input_data_ideal() -> TestInputData:
     # 0th bin does not obey this, but is not relevant anyway
     rho_d_expected[0] = np.exp((4 * np.log(0.8) - np.log(0.05)) / 3)
 
-    yield [
+    yield (
         n,
         rho_bulk,
         rho_s_0,
@@ -128,7 +124,7 @@ def input_data_ideal() -> TestInputData:
         j_d_expected,
         rho_s_expected,
         rho_d_expected,
-    ]
+    )
 
     # different bulk density
     rho_bulk = 0.5
@@ -136,7 +132,7 @@ def input_data_ideal() -> TestInputData:
     rho_d_0 = np.ones(n) * rho_bulk
 
     # constant densities are still unchanged
-    yield [
+    yield (
         n,
         rho_bulk,
         rho_s_0,
@@ -146,7 +142,7 @@ def input_data_ideal() -> TestInputData:
         np.zeros(n),
         np.zeros(n),
         np.ones(n) * rho_bulk
-    ]
+    )
 
 
 @pytest.mark.parametrize("input_data", input_data_ideal())
@@ -168,7 +164,7 @@ def test_ideal_gas(input_data: TestInputData) -> None:
     np.testing.assert_almost_equal(rho_d_expected, rho_d_1, decimal=precision_ideal)
 
 
-def input_data_hard_spheres() -> None:
+def input_data_hard_spheres() -> Generator[TestInputData, None, None]:
     n = 4096
     rho_bulk = 1.
 
@@ -177,7 +173,7 @@ def input_data_hard_spheres() -> None:
     rho_d_0 = np.ones(n) * rho_bulk
 
     # constant densities are unchanged
-    yield [
+    yield (
         n,
         rho_bulk,
         rho_s_0,
@@ -187,7 +183,7 @@ def input_data_hard_spheres() -> None:
         np.zeros(n),
         np.zeros(n),
         np.ones(n) * rho_bulk
-    ]
+    )
 
 
 @pytest.mark.parametrize("input_data", input_data_hard_spheres())
