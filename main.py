@@ -24,7 +24,8 @@ from ddft_shell import DDFTShell
 from cutoff import Cutoff
 from fexc.loader import load_functional
 from initial import load_initial
-from util import log_state, log, get_functional_config
+from logger.ascii_logger import AsciiLogger
+from util import log, get_functional_config
 
 
 def main():
@@ -50,6 +51,7 @@ def main():
     D_rho_shell_dist = np.zeros(num_bins)
     t0 = 0
     ddft = None
+    logger = AsciiLogger()
     for phase in config["integration"]:
         log(" > {} phase".format(phase["name"]))
         small_steps = phase["small_steps"]
@@ -59,7 +61,7 @@ def main():
                          Cutoff(1e-70))
         for t in tqdm(range(int(simulation_time * big_steps)), position=0, desc='big steps', file=sys.stderr):
             norm_self, norm_dist = ddft.norms()
-            log_state([
+            logger.log_state([
                 ("r", r),
                 ("rho_self", rho_self),
                 ("rho_dist", rho_dist),
@@ -72,7 +74,7 @@ def main():
                 "norm_self": norm_self,
                 "norm_dist": norm_dist
             })
-            for tt in tqdm(range(small_steps), position=1, desc='small steps', file=sys.stderr):
+            for _ in tqdm(range(small_steps), position=1, desc='small steps', file=sys.stderr):
                 rho_self, rho_dist, j_s, j_d, D_rho_shell_self, D_rho_shell_dist = ddft.step()
             if not (np.all(np.isfinite(rho_self)) and np.all(np.isfinite(rho_dist))):
                 log("ERROR: invalid number detected in rho")
@@ -80,7 +82,7 @@ def main():
         t0 += simulation_time
         log(" > {} phase done".format(phase["name"]))
     norm_self, norm_dist = ddft.norms()
-    log_state([
+    logger.log_state([
         ("r", r),
         ("rho_self", rho_self),
         ("rho_dist", rho_dist),
