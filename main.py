@@ -47,8 +47,6 @@ def main():
     r = np.arange(num_bins) * dr
     j_s = np.zeros(num_bins)
     j_d = np.zeros(num_bins)
-    D_rho_shell_self = np.zeros(num_bins)
-    D_rho_shell_dist = np.zeros(num_bins)
     t0 = 0
     ddft = None
     logger = AsciiLogger()
@@ -66,16 +64,14 @@ def main():
                 ("rho_self", rho_self),
                 ("rho_dist", rho_dist),
                 ("j_self", j_s),
-                ("j_dist", j_d),
-                ("D_rho_shell_self", D_rho_shell_self),
-                ("D_rho_shell_dist", D_rho_shell_dist)
+                ("j_dist", j_d)
             ], {
                 "t": t / big_steps + t0,
                 "norm_self": norm_self,
                 "norm_dist": norm_dist
             })
             for _ in tqdm(range(small_steps), position=1, desc='small steps', file=sys.stderr):
-                rho_self, rho_dist, j_s, j_d, D_rho_shell_self, D_rho_shell_dist = ddft.step()
+                rho_self, rho_dist, j_s, j_d = ddft.step()
             if not (np.all(np.isfinite(rho_self)) and np.all(np.isfinite(rho_dist))):
                 log("ERROR: invalid number detected in rho")
                 sys.exit(1)
@@ -87,9 +83,7 @@ def main():
         ("rho_self", rho_self),
         ("rho_dist", rho_dist),
         ("j_self", j_s),
-        ("j_dist", j_d),
-        ("D_rho_shell_self", D_rho_shell_self),
-        ("D_rho_shell_dist", D_rho_shell_dist)
+        ("j_dist", j_d)
     ], {
         "t": t0,
         "norm_self": norm_self,
