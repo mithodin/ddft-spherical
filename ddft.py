@@ -21,7 +21,8 @@ class DDFT:
         size_zero = int(2./self._ana.dr)
         size_fade = int(2./self._ana.dr)
         fade_out = np.zeros((size_zero + size_fade), dtype=np.float64)
-        fade_out[-(size_zero + size_fade):-size_fade] = (np.flip(np.arange(size_fade, dtype=np.float64))/(size_fade-1))**2
+        fade_out[-(size_zero + size_fade):-size_fade] \
+            = (np.flip(np.arange(size_fade, dtype=np.float64))/(size_fade-1))**2
         d_rho_s[-(size_zero + size_fade):] *= fade_out
         d_rho_d[-(size_zero + size_fade):] *= fade_out
 

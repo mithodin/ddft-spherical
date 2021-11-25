@@ -9,5 +9,3 @@ class Diffusion:
     def step(self, rho):
         j = -self._ana.gradient(rho)
         return rho - self._ana.divergence(j)*self._dt
-
-

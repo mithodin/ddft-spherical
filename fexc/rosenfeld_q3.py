@@ -39,7 +39,9 @@ class RosenfeldQ3(Fexc):
         phi = self._phi(n2, n3, n2v)
         return self._ana.integrate(phi)
 
-    def d_fexc_d_rho(self, rho: (np.array, np.array), wd: (np.array, np.array, np.array) = None) -> (np.array, np.array):
+    def d_fexc_d_rho(
+            self, rho: (np.array, np.array), wd: (np.array, np.array, np.array) = None
+    ) -> (np.array, np.array):
         try:
             n2, n3, n2v = wd
         except TypeError:
@@ -56,5 +58,3 @@ class RosenfeldQ3(Fexc):
         rho_tot = rho[0] + rho[1]
         wd = self._wd.calc_densities([WD.N2, WD.N3, WD.N2V], rho_tot)
         return self.fexc(rho, wd), *self.d_fexc_d_rho(rho, wd)
-
-

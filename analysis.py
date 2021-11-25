@@ -8,7 +8,7 @@ class Analysis:
         self.n = n
         self.__init_weights()
         self.__init_weights_shell()
-    
+
     def __init_weights(self):
         dr, n, weights = self.__init_integral()
         self.__init_divergence(dr, n, weights)

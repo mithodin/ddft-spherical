@@ -16,7 +16,9 @@ def load_initial(filename: str) -> (float, int, float, np.array, np.array):
     return dr, num_bins, bulk_density, rho_self, rho_dist
 
 
-def export(filename: str, dr: float, num_bins: int, bulk_density: float, rho_self: np.array, rho_dist: np.array) -> None:
+def export(
+        filename: str, dr: float, num_bins: int, bulk_density: float, rho_self: np.array, rho_dist: np.array
+) -> None:
     """
     Save a compressed numpy file in the correct format for the loader to load
     :param filename: the name of the file (should include the .npz file extension)

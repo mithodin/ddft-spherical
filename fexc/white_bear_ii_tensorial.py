@@ -25,7 +25,8 @@ class WhiteBearIITensorial(Fexc):
         n0 = n2 / sy.pi
         phi2 = (2*n3-n3**2+2*(1-n3)*sy.log(1-n3))/n3
         phi3 = (2*n3-3*n3**2+2*n3**3+2*(1-n3)**2*sy.log(1-n3))/n3**2
-        phi = -n0*sy.log(1-n3)+(n1*n2-n1v*n2v)*(1+phi2/3)/(1-n3) + (n2**3-3*n2*n2v**2+9*(3*n11**3-n11*n2v**2))*(1-phi3/3)/(24*sy.pi*(1-n3)**2)
+        phi = -n0*sy.log(1-n3)+(n1*n2-n1v*n2v)*(1+phi2/3)/(1-n3) \
+            + (n2**3-3*n2*n2v**2+9*(3*n11**3-n11*n2v**2))*(1-phi3/3)/(24*sy.pi*(1-n3)**2)
         self._phi = sy.lambdify([n2, n3, n2v, n11], phi)
         self._dphi = {
             WD.PSI2: sy.lambdify([n2, n3, n2v, n11], sy.simplify(phi.diff(n2))),
@@ -43,7 +44,8 @@ class WhiteBearIITensorial(Fexc):
         phi = self._phi(n2, n3, n2v, n11)
         return self._ana.integrate(phi)
 
-    def d_fexc_d_rho(self, rho: (np.array, np.array), wd: (np.array, np.array, np.array, np.array) = None) -> (np.array, np.array):
+    def d_fexc_d_rho(self, rho: (np.array, np.array), wd: (np.array, np.array, np.array, np.array) = None)\
+            -> (np.array, np.array):
         try:
             n2, n3, n2v, n11 = wd
         except TypeError:
@@ -52,7 +54,8 @@ class WhiteBearIITensorial(Fexc):
 
         dphi = {wd: self._dphi[wd](n2, n3, n2v, n11) for wd in [WD.PSI2, WD.PSI3, WD.PSI2V, WD.PSI11]}
 
-        psi2, psi3, psi2v, psi11 = (self._wd.calc_density(wd, dphi[wd]) for wd in [WD.PSI2, WD.PSI3, WD.PSI2V, WD.PSI11])
+        psi2, psi3, psi2v, psi11 = \
+            (self._wd.calc_density(wd, dphi[wd]) for wd in [WD.PSI2, WD.PSI3, WD.PSI2V, WD.PSI11])
         s = psi2 + psi3 + psi2v + psi11
         return s, s
 

@@ -71,8 +71,7 @@ class DDFTShell(DDFT):
         self._cutoff(self._rho_s)
         self._cutoff(self._rho_d)
 
-        return self._rho_s, self._rho_d, \
-               j_s, j_d
+        return self._rho_s, self._rho_d, j_s, j_d
 
     def _calculate_shell_density_update(self, j_shell_s: np.array, j_shell_d: np.array) -> (np.array, np.array):
         delta_rho_shell_extended_s = np.concatenate(([0], self._delta_rho_shell_s, [self._delta_rho_shell_bulk_s]),
@@ -88,9 +87,9 @@ class DDFTShell(DDFT):
         d_delta_rho_shell_d = (delta_rho_shell_extended_d[2:] - 2 * delta_rho_shell_extended_d[1:-1]
                                + delta_rho_shell_extended_d[:-2]) / self._dr
         d_delta_rho_shell_s += - delta_rho_shell_over_radius_extended_s[2:] \
-                               + delta_rho_shell_over_radius_extended_s[:-2]
+            + delta_rho_shell_over_radius_extended_s[:-2]
         d_delta_rho_shell_d += - delta_rho_shell_over_radius_extended_d[2:] \
-                               + delta_rho_shell_over_radius_extended_d[:-2]
+            + delta_rho_shell_over_radius_extended_d[:-2]
         d_delta_rho_shell_s += - (j_shell_extended_s[2:] - j_shell_extended_s[:-2]) / (2 * self._D)
         d_delta_rho_shell_d += - (j_shell_extended_d[2:] - j_shell_extended_d[:-2]) / (2 * self._D)
         d_delta_rho_shell_s *= self._D * self._dt / self._dr

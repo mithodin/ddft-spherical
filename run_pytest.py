@@ -1,6 +1,7 @@
-import os, pathlib
+import os
+import pathlib
 import pytest
 
 if __name__ == "__main__":
-    os.chdir( pathlib.Path.cwd() / 'test' )
+    os.chdir(pathlib.Path.cwd() / 'test')
     pytest.main()

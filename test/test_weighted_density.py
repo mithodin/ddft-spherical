@@ -67,7 +67,7 @@ def test_weighted_densities():
     rho_discrete = np.array([rho_eval(i * dr) for i in range(n)])
 
     n3_discrete, n2_discrete, n2v_discrete, n11_discrete, \
-    psi3_discrete, psi2_discrete, psi2v_discrete, psi11_discrete \
+        psi3_discrete, psi2_discrete, psi2v_discrete, psi11_discrete \
         = wd.calc_densities([WD.N3, WD.N2, WD.N2V, WD.N11, WD.PSI3, WD.PSI2, WD.PSI2V, WD.PSI11], rho_discrete)
 
     n3_ana = n3(r)
@@ -80,14 +80,14 @@ def test_weighted_densities():
     psi11_ana = psi11(r)
 
     mask = int(0.5/dr)
-    np.savetxt("n3.dat", np.hstack((r.reshape(-1,1), n3_discrete.reshape(-1,1), n3_ana.reshape(-1,1))))
-    np.savetxt("n2.dat", np.hstack((r.reshape(-1,1), n2_discrete.reshape(-1,1), n2_ana.reshape(-1,1))))
-    np.savetxt("n2v.dat", np.hstack((r.reshape(-1,1), n2v_discrete.reshape(-1,1), n2v_ana.reshape(-1,1))))
-    np.savetxt("n11.dat", np.hstack((r.reshape(-1,1), n11_discrete.reshape(-1,1), n11_ana.reshape(-1,1))))
-    np.savetxt("psi3.dat", np.hstack((r.reshape(-1,1), psi3_discrete.reshape(-1,1), psi3_ana.reshape(-1,1))))
-    np.savetxt("psi2.dat", np.hstack((r.reshape(-1,1), psi2_discrete.reshape(-1,1), psi2_ana.reshape(-1,1))))
-    np.savetxt("psi2v.dat", np.hstack((r.reshape(-1,1), psi2v_discrete.reshape(-1,1), psi2v_ana.reshape(-1,1))))
-    np.savetxt("psi11.dat", np.hstack((r.reshape(-1,1), psi11_discrete.reshape(-1,1), psi11_ana.reshape(-1,1))))
+    np.savetxt("n3.dat", np.hstack((r.reshape(-1, 1), n3_discrete.reshape(-1, 1), n3_ana.reshape(-1, 1))))
+    np.savetxt("n2.dat", np.hstack((r.reshape(-1, 1), n2_discrete.reshape(-1, 1), n2_ana.reshape(-1, 1))))
+    np.savetxt("n2v.dat", np.hstack((r.reshape(-1, 1), n2v_discrete.reshape(-1, 1), n2v_ana.reshape(-1, 1))))
+    np.savetxt("n11.dat", np.hstack((r.reshape(-1, 1), n11_discrete.reshape(-1, 1), n11_ana.reshape(-1, 1))))
+    np.savetxt("psi3.dat", np.hstack((r.reshape(-1, 1), psi3_discrete.reshape(-1, 1), psi3_ana.reshape(-1, 1))))
+    np.savetxt("psi2.dat", np.hstack((r.reshape(-1, 1), psi2_discrete.reshape(-1, 1), psi2_ana.reshape(-1, 1))))
+    np.savetxt("psi2v.dat", np.hstack((r.reshape(-1, 1), psi2v_discrete.reshape(-1, 1), psi2v_ana.reshape(-1, 1))))
+    np.savetxt("psi11.dat", np.hstack((r.reshape(-1, 1), psi11_discrete.reshape(-1, 1), psi11_ana.reshape(-1, 1))))
 
     assert n3_discrete[:-mask] == approx(n3_ana[:-mask], rel=1e-5)
     assert n2_discrete[:-mask] == approx(n2_ana[:-mask], rel=1e-5)
@@ -107,9 +107,9 @@ def test_extrapolate():
     wd = WeightedDensity(ana, wc)
 
     f = np.arange(n) * dr
-    f_extrapolated = wd._extrapolate(f.copy(), (8, 17), (17, 32))
+    f_extrapolated = wd.__extrapolate(f.copy(), (8, 17), (17, 32))
     assert f_extrapolated == approx(f)
 
     f = np.arange(n) * dr + 10.0
-    f_extrapolated = wd._extrapolate(f.copy(), (8, 17), (17, 32))
+    f_extrapolated = wd.__extrapolate(f.copy(), (8, 17), (17, 32))
     assert f_extrapolated == approx(f)

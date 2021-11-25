@@ -4,7 +4,6 @@ from analysis import Analysis
 from ddft import DDFT
 from diffusion import Diffusion
 from fexc.fexc import Fexc
-from pytest import approx
 
 
 def test_free_diffusion():
