@@ -156,7 +156,7 @@ def test_ideal_gas(input_data):
     f_exc = Fexc(ana)
     ddft = DDFTShell(ana, dt, f_exc, (rho_s_0, rho_d_0), rho_bulk)
 
-    rho_s_1, rho_d_1, j_s_1, j_d_1, _, _ = ddft.step(f_ext=f_ext)
+    rho_s_1, rho_d_1, j_s_1, j_d_1 = ddft.step(f_ext=f_ext)
 
     np.testing.assert_almost_equal(j_s_expected, j_s_1, decimal=precision_ideal)
     np.testing.assert_almost_equal(j_d_expected, j_d_1, decimal=precision_ideal)
@@ -199,7 +199,7 @@ def test_hard_spheres(input_data):
     f_exc = RosenfeldQ3(ana, wd)
     ddft = DDFTShell(ana, dt, f_exc, (rho_s_0, rho_d_0), rho_bulk)
 
-    rho_s_1, rho_d_1, j_s_1, j_d_1, _, _ = ddft.step(f_ext=f_ext)
+    rho_s_1, rho_d_1, j_s_1, j_d_1 = ddft.step(f_ext=f_ext)
 
     np.testing.assert_almost_equal(j_s_expected[1:], j_s_1[1:], decimal=precision_hard_spheres)
     np.testing.assert_almost_equal(j_d_expected[1:], j_d_1[1:], decimal=precision_hard_spheres)
