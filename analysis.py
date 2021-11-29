@@ -5,8 +5,8 @@ from scipy import sparse
 
 
 class Analysis:
-    _n: int
-    _dr: float
+    n: int
+    dr: float
 
     def __init__(self: 'Analysis', dr: float, n: int) -> None:
         self.dr = dr
