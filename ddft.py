@@ -40,8 +40,10 @@ class DDFT:
             grad_d_fexc_dist -= f_ext[1]
         grad_rho_self = self._ana.forward_gradient(self._rho_s)
         grad_rho_dist = self._ana.forward_gradient(self._rho_d)
-        delta_self = 4*np.pi*self._radius_bin**2*(grad_rho_self + self._rho_s*grad_d_fexc_self)
-        delta_dist = 4*np.pi*self._radius_bin**2*(grad_rho_dist + self._rho_d*grad_d_fexc_dist)
+        rho_s_at_ri = self._ana.evaluate_at(self._rho_s, self._radius_bin)
+        rho_d_at_ri = self._ana.evaluate_at(self._rho_d, self._radius_bin)
+        delta_self = 4*np.pi*self._radius_bin**2*(grad_rho_self + rho_s_at_ri*grad_d_fexc_self)
+        delta_dist = 4*np.pi*self._radius_bin**2*(grad_rho_dist + rho_d_at_ri*grad_d_fexc_dist)
         d_rho_s = (delta_self - np.roll(delta_self, 1))
         d_rho_d = (delta_dist - np.roll(delta_dist, 1))
         d_rho_s[0] = delta_self[0]
