@@ -7,10 +7,12 @@ from scipy import sparse
 class Analysis:
     n: int
     dr: float
+    r: np.ndarray
 
     def __init__(self: 'Analysis', dr: float, n: int) -> None:
         self.dr = dr
         self.n = n
+        self.r = np.arange(n, dtype=np.float64) * dr
         self.__init_weights()
         self.__init_weights_shell()
 
@@ -93,3 +95,14 @@ class Analysis:
         slope = (x_fit*(f[fitrange[0]:fitrange[1]] - f[fitrange[1]-1])).sum() / (x_fit**2).sum()
         f[extrapolate[0]:extrapolate[1]] = f[offset] + slope * x_extrapolate
         return f
+
+    def evaluate_at(self: 'Analysis', f: np.ndarray, r: np.ndarray) -> np.ndarray:
+        """
+        Return linear interpolation of values in f at the points given in r.
+        Assumes that
+          - the values in f start at r=0 and are spaced a length dr apart
+          - the value in r[i] is in the interval [i*dr, (i+1)*dr]
+        """
+        f_continued = np.concatenate((f, [f[-1]]))
+        r_i = (r - self.r)/self.dr
+        return f*(1-r_i) + f_continued[1:]*r_i

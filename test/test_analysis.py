@@ -74,3 +74,39 @@ def test_extrapolate() -> None:
     f = np.arange(n) * dr + 10.0
     f_extrapolated = ana.extrapolate(f.copy(), (8, 17), (17, 32))
     assert f_extrapolated == approx(f)
+
+
+def test_evaluate_at_half_interval() -> None:
+    dr = 2 ** -3
+    n = 4
+    ana = Analysis(dr, n)
+
+    f = np.arange(4)
+    r = (f + 0.5)*dr
+
+    f_evaluated = ana.evaluate_at(f, r)
+    assert f_evaluated == approx([0.5, 1.5, 2.5, 3.0])
+
+
+def test_evaluate_at_quarter_interval() -> None:
+    dr = 2 ** -3
+    n = 4
+    ana = Analysis(dr, n)
+
+    f = np.arange(4)
+    r = (f + 0.25)*dr
+
+    f_evaluated = ana.evaluate_at(f, r)
+    assert f_evaluated == approx([0.25, 1.25, 2.25, 3.0])
+
+
+def test_evaluate_at_three_quarter_interval() -> None:
+    dr = 2 ** -3
+    n = 4
+    ana = Analysis(dr, n)
+
+    f = np.arange(4)
+    r = (f + 0.75)*dr
+
+    f_evaluated = ana.evaluate_at(f, r)
+    assert f_evaluated == approx([0.75, 1.75, 2.75, 3.0])
