@@ -3,7 +3,7 @@ from typing import Tuple
 from cutoff import Cutoff
 
 
-def load_initial(filename: str) -> Tuple[float, int, float, np.ndarray, np.ndarray]:
+def load_initial_density_profiles(filename: str) -> Tuple[float, int, float, np.ndarray, np.ndarray]:
     with np.load(filename) as loaded:
         dr = loaded["dr"]
         num_bins = loaded["num_bins"]
